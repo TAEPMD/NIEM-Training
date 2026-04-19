@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import Link from 'next/link';
 import { 
   BookOpen, Calendar, Search, Activity, Users, 
   FileText, ChevronRight, ShieldAlert, Award, 
