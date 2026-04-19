@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { 
-  BookOpen, Calendar, Search, Link as LinkIcon, 
-  Activity, Users, FileText, ChevronRight, ShieldAlert,
-  Award, ArrowRight, Sparkles, Loader2
+  BookOpen, Calendar, Search, Activity, Users, 
+  FileText, ChevronRight, ShieldAlert, Award, 
+  ArrowRight, Sparkles, Loader2, Globe, Link as LinkIcon 
 } from 'lucide-react';
 import { supabase } from '@/utils/supabase';
 
