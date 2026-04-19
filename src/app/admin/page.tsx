@@ -58,7 +58,19 @@ export default function AdminDashboard() {
   const [systems, setSystems] = useState<SystemItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dbError, setDbError] = useState(false);
-  const [heroSettings, setHeroSettings] = useState<any>({ title: 'ศูนย์ฝึกอบรม NIEM Thailand', subtitle: '', button_text: 'ดูตารางอบรม' });
+  const [heroSettings, setHeroSettings] = useState<any>({ 
+    title: 'ศูนย์ฝึกอบรม NIEM Thailand', 
+    subtitle: '', 
+    button_text: 'ดูตารางอบรม',
+    button2_text: 'ระบบตรวจสอบวุฒิบัตร'
+  });
+  const [navSettings, setNavSettings] = useState<any[]>([
+    { name: 'หน้าแรก', href: '/', tab: 'home' },
+    { name: 'หลักสูตร', href: '/', tab: 'courses' },
+    { name: 'บทความ (Blog)', href: '/blog', tab: 'blog' },
+    { name: 'ระบบสารสนเทศ', href: '/systems', tab: 'systems' },
+    { name: 'ค้นหาใบประกาศฯ', href: '/', tab: 'cert' },
+  ]);
 
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -99,8 +111,11 @@ export default function AdminDashboard() {
         if (error) throw error;
         setSystems(data || []);
       } else if (activeTab === 'settings') {
-        const { data } = await supabase.from('settings').select('*').eq('key', 'hero').single();
-        if (data) setHeroSettings(data.value);
+        const { data: hero } = await supabase.from('settings').select('*').eq('key', 'hero').single();
+        if (hero) setHeroSettings(hero.value);
+        
+        const { data: nav } = await supabase.from('settings').select('*').eq('key', 'navigation').single();
+        if (nav) setNavSettings(nav.value);
       }
     } catch (err) {
       console.error(err);
@@ -628,18 +643,74 @@ export default function AdminDashboard() {
                 <textarea rows={3} value={heroSettings.subtitle} onChange={(e) => setHeroSettings({...heroSettings, subtitle: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none text-sm leading-relaxed" />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-black uppercase text-slate-400 tracking-widest">ข้อความบนปุ่ม (Button Text)</label>
+                <label className="text-xs font-black uppercase text-slate-400 tracking-widest">ข้อความปุ่มที่ 1 (Primary Button)</label>
                 <input type="text" value={heroSettings.button_text} onChange={(e) => setHeroSettings({...heroSettings, button_text: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase text-slate-400 tracking-widest">ข้อความปุ่มที่ 2 (Secondary Button)</label>
+                <input type="text" value={heroSettings.button2_text || ''} onChange={(e) => setHeroSettings({...heroSettings, button2_text: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
               </div>
               <button 
                 onClick={async () => {
                   const { error } = await supabase.from('settings').upsert({ key: 'hero', value: heroSettings });
                   if (error) alert(error.message);
-                  else alert('บันทึกการตั้งค่าแล้ว');
+                  else alert('บันทึกการตั้งค่า Hero แล้ว');
                 }}
                 className="w-full py-5 bg-blue-600 text-white font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-200 transition mt-4"
               >
-                Save Settings
+                Save Hero Settings
+              </button>
+            </div>
+
+            <div className="mt-16 space-y-8">
+              <h2 className="text-2xl font-black text-slate-800 flex items-center tracking-tight">
+                <LayoutDashboard className="w-6 h-6 mr-3 text-blue-600" /> จัดการเมนูนำทาง (Navigation)
+              </h2>
+              <div className="space-y-4">
+                {navSettings.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl group">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 flex items-center justify-center bg-white rounded-lg text-slate-400 font-bold mr-4 shadow-sm border border-slate-100">
+                        {index + 1}
+                      </div>
+                      <span className="font-bold text-slate-700">{item.name}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        disabled={index === 0}
+                        onClick={() => {
+                          const newNav = [...navSettings];
+                          [newNav[index-1], newNav[index]] = [newNav[index], newNav[index-1]];
+                          setNavSettings(newNav);
+                        }}
+                        className="p-2 bg-white rounded-xl text-slate-400 hover:text-blue-600 disabled:opacity-20 transition"
+                      >
+                        <Plus className="w-4 h-4 transform rotate-[-90deg]" />
+                      </button>
+                      <button 
+                         disabled={index === navSettings.length - 1}
+                         onClick={() => {
+                           const newNav = [...navSettings];
+                           [newNav[index+1], newNav[index]] = [newNav[index], newNav[index+1]];
+                           setNavSettings(newNav);
+                         }}
+                        className="p-2 bg-white rounded-xl text-slate-400 hover:text-blue-600 disabled:opacity-20 transition"
+                      >
+                        <Plus className="w-4 h-4 transform rotate-90deg]" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button 
+                onClick={async () => {
+                  const { error } = await supabase.from('settings').upsert({ key: 'navigation', value: navSettings });
+                  if (error) alert(error.message);
+                  else alert('บันทึกลำดับเมนูแล้ว');
+                }}
+                className="w-full py-5 bg-slate-900 text-white font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-slate-800 shadow-xl shadow-slate-200 transition mt-4"
+              >
+                Save Navigation Order
               </button>
             </div>
           </div>

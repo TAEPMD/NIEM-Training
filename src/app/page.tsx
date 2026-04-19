@@ -141,10 +141,10 @@ export default function App() {
                 
                 <div className="flex flex-col sm:flex-row gap-4">
                   <button onClick={() => setActiveTab('courses')} className="bg-blue-600 text-white px-10 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-2xl shadow-blue-600/40 hover:bg-white hover:text-blue-900 transition-all duration-500 transform hover:-translate-y-1 active:scale-95 flex items-center justify-center">
-                    {heroData.button_text} <ChevronRight className="w-5 h-5 ml-2" />
+                    {heroData.button_text || 'ดูตารางอบรม'} <ChevronRight className="w-5 h-5 ml-2" />
                   </button>
                   <button onClick={() => setActiveTab('cert')} className="bg-white/10 backdrop-blur-md text-white border border-white/10 px-10 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-white/20 transition-all flex items-center justify-center">
-                    ระบบตรวจสอบวุฒิบัตร
+                    {heroData.button2_text || 'ระบบตรวจสอบวุฒิบัตร'}
                   </button>
                 </div>
               </div>

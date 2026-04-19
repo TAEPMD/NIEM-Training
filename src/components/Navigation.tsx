@@ -12,27 +12,31 @@ interface NavPage {
 
 export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string, setActiveTab?: (tab: string) => void }) {
   const [dynamicPages, setDynamicPages] = useState<NavPage[]>([]);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchPages = async () => {
-      const { data } = await supabase
-        .from('pages')
-        .select('title, slug')
-        .eq('status', 'Published')
-        .order('id', { ascending: true });
-      if (data) setDynamicPages(data);
-    };
-    fetchPages();
-  }, []);
-
-  const navLinks = [
+  const [navLinks, setNavLinks] = useState<any[]>([
     { name: 'หน้าแรก', href: '/', tab: 'home' },
     { name: 'หลักสูตร', href: '/', tab: 'courses' },
     { name: 'บทความ (Blog)', href: '/blog', tab: 'blog' },
     { name: 'ระบบสารสนเทศ', href: '/systems', tab: 'systems' },
     { name: 'ค้นหาใบประกาศฯ', href: '/', tab: 'cert' },
-  ];
+  ]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchNavData = async () => {
+      // Fetch Dynamic Pages
+      const { data: pages } = await supabase
+        .from('pages')
+        .select('title, slug')
+        .eq('status', 'Published')
+        .order('id', { ascending: true });
+      if (pages) setDynamicPages(pages);
+
+      // Fetch Nav Order
+      const { data: nav } = await supabase.from('settings').select('*').eq('key', 'navigation').single();
+      if (nav && nav.value) setNavLinks(nav.value);
+    };
+    fetchNavData();
+  }, []);
 
   return (
     <nav className="bg-blue-900 text-white shadow-xl sticky top-0 z-50 border-b border-blue-800">
