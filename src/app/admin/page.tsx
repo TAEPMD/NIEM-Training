@@ -5,7 +5,7 @@ import {
   Plus, Search, Edit2, Trash2,
   Save, X, LayoutDashboard, BookOpen, Settings,
   LogOut, Activity, Globe, Eye, Loader2, AlertTriangle,
-  FileText, Sparkles, Link as LinkIcon, Menu
+  FileText, Sparkles, Link as LinkIcon, Menu, Lock, Key, Delete
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabase';
@@ -88,6 +88,53 @@ export default function AdminDashboard() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('All');
+
+  // Auth State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState(false);
+
+  useEffect(() => {
+    const authStatus = sessionStorage.getItem('admin_authenticated');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handlePinSubmit = async (val: string) => {
+    // SHA-256 Hash of "140433"
+    const targetHash = "f11a806967732ef2160d5b62b78b0531551a3782ed0f4f91d6426463991807d7";
+    
+    // Simple hash function using Web Crypto API
+    const msgBuffer = new TextEncoder().encode(val);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    if (hashHex === targetHash) {
+      sessionStorage.setItem('admin_authenticated', 'true');
+      setIsAuthenticated(true);
+      setPinError(false);
+    } else {
+      setPinError(true);
+      setPin('');
+      setTimeout(() => setPinError(false), 2000);
+    }
+  };
+
+  const handleKeyClick = (key: string) => {
+    if (pin.length < 6) {
+      const newPin = pin + key;
+      setPin(newPin);
+      if (newPin.length === 6) {
+        handlePinSubmit(newPin);
+      }
+    }
+  };
+
+  const handleBackspace = () => {
+    setPin(pin.slice(0, -1));
+  };
 
   // Load data from Supabase
   const fetchData = async () => {
@@ -302,6 +349,71 @@ export default function AdminDashboard() {
     (filterCategory === 'All' || c.category === filterCategory)
   );
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
+        {/* Animated Background Orbs */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 blur-[120px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-600/10 blur-[120px] rounded-full animate-pulse decoration-1000"></div>
+
+        <div className="w-full max-w-md relative z-10">
+          <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[3rem] p-10 shadow-2xl flex flex-col items-center">
+            <div className="w-20 h-20 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-3xl flex items-center justify-center mb-8 shadow-2xl shadow-blue-500/20 transform hover:rotate-12 transition">
+              <Lock className="w-10 h-10 text-white" />
+            </div>
+            
+            <h1 className="text-2xl font-black text-white mb-2 tracking-tight">Admin Authentication</h1>
+            <p className="text-slate-500 text-sm mb-10 font-medium uppercase tracking-[0.2em]">Restricted Area</p>
+
+            {/* PIN Display */}
+            <div className={`flex gap-3 mb-12 ${pinError ? 'animate-bounce text-red-500' : ''}`}>
+              {[...Array(6)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${
+                    pin.length > i 
+                      ? (pinError ? 'bg-red-500 border-red-500 scale-125' : 'bg-blue-500 border-blue-500 scale-125 shadow-[0_0_15px_rgba(59,130,246,0.5)]') 
+                      : 'border-white/20'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* Keypad */}
+            <div className="grid grid-cols-3 gap-4 w-full">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'empty', 0, 'back'].map((key, i) => (
+                <button
+                  key={i}
+                  disabled={key === 'empty'}
+                  onClick={() => key === 'back' ? handleBackspace() : handleKeyClick(key.toString())}
+                  className={`h-16 rounded-2xl flex items-center justify-center text-xl font-black transition-all active:scale-95 ${
+                    key === 'empty' 
+                      ? 'opacity-0 cursor-default' 
+                      : (key === 'back' 
+                          ? 'bg-white/5 text-slate-400 hover:bg-red-500/20 hover:text-red-400' 
+                          : 'bg-white/5 text-white hover:bg-white/10 border border-white/5')
+                  }`}
+                >
+                  {key === 'back' ? <Delete className="w-6 h-6" /> : (key === 'empty' ? '' : key)}
+                </button>
+              ))}
+            </div>
+
+            {pinError && (
+              <p className="mt-8 text-red-400 text-xs font-black uppercase tracking-widest animate-pulse">
+                Incorrect PIN. Please try again.
+              </p>
+            )}
+            
+            <Link href="/" className="mt-10 text-slate-500 text-xs font-bold hover:text-white transition flex items-center">
+              <X className="w-3 h-3 mr-2" /> Cancel & Return Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans relative">
       {/* Sidebar - Desktop */}
@@ -367,9 +479,15 @@ export default function AdminDashboard() {
         </nav>
 
         <div className="p-4 border-t border-slate-800 pb-8">
-          <Link href="/" className="flex items-center w-full p-3 text-slate-400 hover:text-white transition group">
+          <button 
+            onClick={() => {
+              sessionStorage.removeItem('admin_authenticated');
+              window.location.href = '/';
+            }}
+            className="flex items-center w-full p-3 text-slate-400 hover:text-white transition group"
+          >
             <LogOut className="w-5 h-5 mr-3 group-hover:text-red-400" /> ออกจากระบบ
-          </Link>
+          </button>
         </div>
       </aside>
 
