@@ -56,7 +56,7 @@ export default function SystemsPage() {
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col uppercase-none">
       <Navbar />
 
-      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 w-full">
         {/* Header Section */}
         <div className="mb-16 text-center">
           <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-100 text-blue-600 text-xs font-black mb-6 tracking-widest uppercase">

@@ -119,30 +119,40 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
         {activeTab === 'home' && (
           <div className="space-y-8 animate-in fade-in duration-500">
-            {/* Hero Section - Compact Banner */}
-            <div className="bg-gradient-to-r from-blue-950 via-blue-900 to-slate-900 rounded-[2rem] shadow-2xl shadow-blue-900/10 overflow-hidden relative">
+            {/* Hero Section - Dynamic Banner */}
+            <div className="bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900 rounded-[2.5rem] shadow-2xl shadow-blue-900/10 overflow-hidden relative min-h-[400px] md:min-h-[500px] flex items-center">
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
               <div className="bg-blue-600/5 absolute inset-0 backdrop-blur-3xl"></div>
-              <div className="px-10 py-10 md:py-14 relative z-10 text-white max-w-4xl">
-                <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-black mb-6 border border-blue-500/20 uppercase tracking-widest">
-                  <Activity className="w-3 h-3 mr-2 text-blue-400" /> Training & Excellence
+              
+              <div className="px-6 py-12 md:px-16 md:py-20 relative z-10 text-white w-full">
+                <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] md:text-xs font-black mb-8 border border-blue-500/20 uppercase tracking-[0.2em] backdrop-blur-md">
+                  <Activity className="w-4 h-4 mr-2 text-blue-400" /> Training & Excellence Center
                 </div>
-                <h1 className="text-3xl md:text-5xl font-black mb-4 leading-tight tracking-tight text-white">
-                  {heroData.title}
+                
+                <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1.1] tracking-tighter text-white max-w-4xl">
+                  {heroData.title.split(' ').map((word: string, i: number) => (
+                    <span key={i} className={i === 1 ? 'text-blue-500' : ''}>{word} </span>
+                  ))}
                 </h1>
-                <p className="text-blue-100/60 text-sm md:text-base mb-8 leading-relaxed max-w-2xl font-medium">
+                
+                <p className="text-blue-100/70 text-sm md:text-lg lg:text-xl mb-10 leading-relaxed max-w-2xl font-medium">
                   {heroData.subtitle}
                 </p>
-                <div className="flex flex-wrap gap-4">
-                  <button onClick={() => setActiveTab('courses')} className="bg-blue-600 text-white px-8 py-3.5 rounded-2xl font-black text-sm shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition transform hover:-translate-y-0.5 active:scale-95 flex items-center">
-                    {heroData.button_text} <ChevronRight className="w-4 h-4 ml-2" />
+                
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button onClick={() => setActiveTab('courses')} className="bg-blue-600 text-white px-10 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-2xl shadow-blue-600/40 hover:bg-white hover:text-blue-900 transition-all duration-500 transform hover:-translate-y-1 active:scale-95 flex items-center justify-center">
+                    {heroData.button_text} <ChevronRight className="w-5 h-5 ml-2" />
+                  </button>
+                  <button onClick={() => setActiveTab('cert')} className="bg-white/10 backdrop-blur-md text-white border border-white/10 px-10 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-white/20 transition-all flex items-center justify-center">
+                    ระบบตรวจสอบวุฒิบัตร
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* News Section */}
-              <div className="md:col-span-2 bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
+              <div className="lg:col-span-8 bg-white rounded-[3rem] shadow-sm border border-slate-100 p-6 md:p-10">
                 <div className="flex justify-between items-center mb-10">
                   <h2 className="text-2xl font-black text-slate-800 flex items-center tracking-tight">
                     <div className="w-2 h-8 bg-blue-600 rounded-full mr-4"></div>
@@ -177,7 +187,7 @@ export default function App() {
               </div>
 
               {/* Information Systems Section */}
-              <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
+              <div className="lg:col-span-4 bg-white rounded-[3rem] shadow-sm border border-slate-100 p-6 md:p-10">
                 <h2 className="text-xl font-black text-slate-800 mb-8 flex items-center tracking-tight">
                   <LinkIcon className="w-5 h-5 mr-3 text-blue-600" /> ระบบสารสนเทศ
                 </h2>

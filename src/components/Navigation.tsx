@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Activity } from 'lucide-react';
+import { Activity, Menu, X } from 'lucide-react';
 import { supabase } from '@/utils/supabase';
 
 interface NavPage {
@@ -12,6 +12,7 @@ interface NavPage {
 
 export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string, setActiveTab?: (tab: string) => void }) {
   const [dynamicPages, setDynamicPages] = useState<NavPage[]>([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchPages = async () => {
@@ -25,35 +26,106 @@ export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string
     fetchPages();
   }, []);
 
+  const navLinks = [
+    { name: 'หน้าแรก', href: '/', tab: 'home' },
+    { name: 'หลักสูตร', href: '/', tab: 'courses' },
+    { name: 'บทความ (Blog)', href: '/blog', tab: 'blog' },
+    { name: 'ระบบสารสนเทศ', href: '/systems', tab: 'systems' },
+    { name: 'ค้นหาใบประกาศฯ', href: '/', tab: 'cert' },
+  ];
+
   return (
-    <nav className="bg-blue-900 text-white shadow-md sticky top-0 z-50">
+    <nav className="bg-blue-900 text-white shadow-xl sticky top-0 z-50 border-b border-blue-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <Link href="/" className="flex items-center cursor-pointer">
-            <Activity className="w-8 h-8 mr-2 text-red-400" />
-            <div>
-              <span className="font-bold text-xl tracking-wider uppercase">Niem</span>
-              <span className="font-light text-blue-200 ml-1 text-xs tracking-widest uppercase">Center</span>
+        <div className="flex justify-between h-20">
+          <Link href="/" className="flex items-center cursor-pointer group">
+            <Activity className="w-9 h-9 mr-3 text-red-500 transform group-hover:rotate-12 transition-transform" />
+            <div className="flex flex-col">
+              <span className="font-black text-2xl tracking-tighter uppercase leading-none">Niem</span>
+              <span className="font-bold text-blue-400 text-[10px] tracking-[0.3em] uppercase leading-none mt-1">Center</span>
             </div>
           </Link>
-          <div className="hidden md:flex space-x-1 items-center font-sans tracking-tight">
-            <Link href="/" onClick={() => setActiveTab?.('home')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'home' ? 'bg-white/10 text-white' : 'text-blue-200 hover:text-white hover:bg-white/5'}`}>หน้าแรก</Link>
-            <Link href="/" onClick={() => setActiveTab?.('courses')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'courses' ? 'bg-white/10 text-white' : 'text-blue-200 hover:text-white hover:bg-white/5'}`}>หลักสูตร</Link>
-            <Link href="/blog" className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'blog' ? 'bg-white/10 text-white' : 'text-blue-200 hover:text-white hover:bg-white/5'}`}>บทความ (Blog)</Link>
-            <Link href="/systems" className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'systems' ? 'bg-white/10 text-white' : 'text-blue-200 hover:text-white hover:bg-white/5'}`}>ระบบสารสนเทศ</Link>
-            <Link href="/" onClick={() => setActiveTab?.('cert')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'cert' ? 'bg-white/10 text-white' : 'text-blue-200 hover:text-white hover:bg-white/5'}`}>ค้นหาใบประกาศฯ</Link>
+
+          {/* Desktop Menu */}
+          <div className="hidden lg:flex space-x-1 items-center font-sans">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.name}
+                href={link.href} 
+                onClick={() => {
+                  if (link.tab) setActiveTab?.(link.tab);
+                }}
+                className={`px-4 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300 ${
+                  activeTab === link.tab 
+                    ? 'bg-white text-blue-900 shadow-lg' 
+                    : 'text-blue-100 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))}
             
-            {/* Dynamic Pages */}
             {dynamicPages.map(page => (
-              <Link key={page.slug} href={`/${page.slug}`} className="px-4 py-2 rounded-xl text-sm font-bold text-blue-200 hover:text-white hover:bg-white/5 transition-all">
+              <Link key={page.slug} href={`/${page.slug}`} className="px-4 py-2.5 rounded-2xl text-sm font-bold text-blue-100 hover:text-white hover:bg-white/10 transition-all">
                 {page.title}
               </Link>
             ))}
 
-            <button className="ml-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-95">User Portal</button>
+            <button className="ml-6 px-7 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-blue-500/20 active:scale-95 transform hover:-translate-y-0.5">
+              User Portal
+            </button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden flex items-center">
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2.5 rounded-2xl bg-white/5 hover:bg-white/10 transition-all text-blue-100"
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu Dropdown */}
+      <div className={`lg:hidden transition-all duration-500 ease-in-out overflow-hidden ${isMenuOpen ? 'max-h-[80vh] border-t border-blue-800' : 'max-h-0'}`}>
+        <div className="px-4 pt-4 pb-8 space-y-2 bg-blue-950/50 backdrop-blur-xl">
+          {navLinks.map((link) => (
+            <Link 
+              key={link.name}
+              href={link.href} 
+              onClick={() => {
+                if (link.tab) setActiveTab?.(link.tab);
+                setIsMenuOpen(false);
+              }}
+              className={`block px-5 py-4 rounded-2xl text-base font-bold transition-all ${
+                activeTab === link.tab 
+                  ? 'bg-blue-600 text-white' 
+                  : 'text-blue-100 hover:bg-white/5'
+              }`}
+            >
+              {link.name}
+            </Link>
+          ))}
+          {dynamicPages.map(page => (
+            <Link 
+              key={page.slug} 
+              href={`/${page.slug}`}
+              onClick={() => setIsMenuOpen(false)}
+              className="block px-5 py-4 rounded-2xl text-base font-bold text-blue-100 hover:bg-white/5 transition-all"
+            >
+              {page.title}
+            </Link>
+          ))}
+          <div className="pt-4 px-2">
+            <button className="w-full py-5 bg-blue-600 text-white font-black uppercase tracking-widest rounded-[2rem] shadow-2xl shadow-blue-900/40">
+              User Portal
+            </button>
           </div>
         </div>
       </div>
     </nav>
   );
 }
+

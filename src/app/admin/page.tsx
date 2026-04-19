@@ -65,6 +65,7 @@ export default function AdminDashboard() {
   const [isPageModalOpen, setIsPageModalOpen] = useState(false);
   const [isBlogModalOpen, setIsBlogModalOpen] = useState(false);
   const [isSystemModalOpen, setIsSystemModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   
   // Current Item state
@@ -287,12 +288,18 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans">
-      {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 text-white hidden lg:flex flex-col sticky top-0 h-screen">
-        <div className="p-6 flex items-center border-b border-slate-800">
-          <Activity className="w-8 h-8 mr-2 text-red-500" />
-          <span className="font-bold text-xl tracking-tight text-white uppercase italic">Niem Admin</span>
+    <div className="min-h-screen bg-slate-50 flex font-sans relative">
+      {/* Sidebar - Desktop */}
+      <aside className={`bg-slate-900 text-white lg:flex flex-col sticky top-0 h-screen transition-all duration-300 z-[60] 
+        ${isSidebarOpen ? 'fixed inset-0 w-full' : 'hidden lg:w-64'}`}>
+        <div className="p-6 flex items-center justify-between border-b border-slate-800">
+          <div className="flex items-center">
+            <Activity className="w-8 h-8 mr-2 text-red-500" />
+            <span className="font-bold text-xl tracking-tight text-white uppercase italic">Niem Admin</span>
+          </div>
+          <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-slate-400 hover:text-white">
+            <X className="w-6 h-6" />
+          </button>
         </div>
         
         <nav className="flex-grow p-4 space-y-2 mt-4">
@@ -337,7 +344,7 @@ export default function AdminDashboard() {
             <Globe className="w-5 h-5 mr-3" /> คลังสื่อ (Media)
           </button>
             <button 
-              onClick={() => setActiveTab('settings')}
+              onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }}
               className={`flex items-center w-full p-3 rounded-xl font-medium transition ${activeTab === 'settings' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
             >
               <Settings className="w-5 h-5 mr-3" /> ตั้งค่าทั่วไป (Settings)
@@ -352,13 +359,18 @@ export default function AdminDashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-grow p-8 max-w-7xl mx-auto overflow-y-auto h-screen">
+      <main className="flex-grow p-4 md:p-8 max-w-7xl mx-auto overflow-y-auto h-screen">
         <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              {activeTab === 'dashboard' ? 'CMS Overview' : activeTab === 'courses' ? 'จัดการหลักสูตรการอบรม' : activeTab === 'pages' ? 'จัดการเนื้อหาหน้าเว็บ' : activeTab === 'blogs' ? 'จัดการ Blog Posts' : activeTab === 'settings' ? 'ตั้งค่าระบบ' : 'จัดการระบบสารสนเทศ'}
-            </h1>
-            <p className="text-slate-500 mt-1">ยินดีต้อนรับสู่ระบบจัดการเนื้อหา (CMS) ของ NIEM Training</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+                {activeTab === 'dashboard' ? 'CMS Overview' : activeTab === 'courses' ? 'จัดการหลักสูตรการอบรม' : activeTab === 'pages' ? 'จัดการเนื้อหาหน้าเว็บ' : activeTab === 'blogs' ? 'จัดการ Blog Posts' : activeTab === 'settings' ? 'ตั้งค่าระบบ' : 'จัดการระบบสารสนเทศ'}
+              </h1>
+              <p className="text-slate-500 text-xs mt-1">ยินดีต้อนรับสู่ระบบจัดการเนื้อหา (CMS)</p>
+            </div>
+            <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-3 bg-white border border-slate-200 rounded-xl text-slate-600">
+              <Menu className="w-6 h-6" />
+            </button>
           </div>
           <div className="flex gap-2">
             <button 
@@ -470,7 +482,8 @@ export default function AdminDashboard() {
                   <input type="text" placeholder="ค้นหาชื่อหลักสูตร..." className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-100 border-none outline-none text-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 </div>
               </div>
-              <table className="w-full text-left">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left min-w-[600px]">
                 <thead className="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-wider">
                   <tr>
                     <th className="px-8 py-4">Name</th>
