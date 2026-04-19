@@ -5,7 +5,7 @@ import {
   Plus, Search, Edit2, Trash2,
   Save, X, LayoutDashboard, BookOpen, Settings,
   LogOut, Activity, Globe, Eye, Loader2, AlertTriangle,
-  FileText, Sparkles, Link as LinkIcon
+  FileText, Sparkles, Link as LinkIcon, Menu
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabase';
