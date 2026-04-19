@@ -39,6 +39,7 @@ export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string
           <div className="hidden md:flex space-x-1 items-center font-sans tracking-tight">
             <Link href="/" onClick={() => setActiveTab?.('home')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'home' ? 'bg-white/10 text-white' : 'text-blue-200 hover:text-white hover:bg-white/5'}`}>หน้าแรก</Link>
             <Link href="/" onClick={() => setActiveTab?.('courses')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'courses' ? 'bg-white/10 text-white' : 'text-blue-200 hover:text-white hover:bg-white/5'}`}>หลักสูตร</Link>
+            <Link href="/blog" className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'blog' ? 'bg-white/10 text-white' : 'text-blue-200 hover:text-white hover:bg-white/5'}`}>บทความ (Blog)</Link>
             <Link href="/" onClick={() => setActiveTab?.('cert')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'cert' ? 'bg-white/10 text-white' : 'text-blue-200 hover:text-white hover:bg-white/5'}`}>ค้นหาใบประกาศฯ</Link>
             
             {/* Dynamic Pages */}

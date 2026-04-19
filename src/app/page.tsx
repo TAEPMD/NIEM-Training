@@ -29,34 +29,45 @@ export default function App() {
 
   const [coursesList, setCoursesList] = useState<CourseItem[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(false);
+  
+  // Real DB Data for News and Systems
+  const [dbNews, setDbNews] = useState<any[]>([]);
+  const [dbSystems, setDbSystems] = useState<any[]>([]);
+  const [heroData, setHeroData] = useState<any>({ 
+    title: 'ศูนย์ฝึกอบรม NIEM Thailand', 
+    subtitle: 'ยกระดับมาตรฐานการแพทย์ฉุกเฉินนอกโรงพยาบาล สู่ความเป็นเลิศทางวิชาการและทักษะการกู้ชีพสากล', 
+    button_text: 'ดูตารางอบรมปี 2026' 
+  });
 
   // Load production data from Supabase
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchHomeData = async () => {
       setLoadingCourses(true);
-      const { data, error } = await supabase.from('courses').select('*').limit(6);
-      if (!error && data) {
-        setCoursesList(data);
-      }
+      
+      // Fetch Courses
+      const { data: courses } = await supabase.from('courses').select('*').limit(6);
+      if (courses) setCoursesList(courses);
+
+      // Fetch News (Blogs)
+      const { data: news } = await supabase.from('blogs').select('*').eq('status', 'Published').order('created_at', { ascending: false }).limit(3);
+      if (news) setDbNews(news);
+
+      // Fetch Systems
+      const { data: systems } = await supabase.from('systems').select('*').order('id', { ascending: true });
+      if (systems) setDbSystems(systems);
+
+      // Fetch Hero settings
+      const { data: hero } = await supabase.from('settings').select('*').eq('key', 'hero').single();
+      if (hero && hero.value) setHeroData(hero.value);
+
       setLoadingCourses(false);
     };
 
-    fetchCourses();
+    fetchHomeData();
   }, []);
-
-  // Production-ready static data (simplified or can be moved to DB too)
-  const newsList: NewsItem[] = [
-    { id: 1, title: 'ประชาสัมพันธ์หลักสูตรการแพทย์ฉุกเฉินใหม่ล่าสุด 2026', date: 'วันนี้', type: 'ประกาศ' },
-  ];
-
-  const externalApps: ExternalApp[] = [
-    { id: 1, name: 'ระบบ ITEMS', desc: 'ข้อมูลผู้ป่วยฉุกเฉิน', icon: <Activity className="w-5 h-5 text-blue-500" /> },
-    { id: 2, name: 'ระบบ D-E-M-S', desc: 'Disaster Management', icon: <ShieldAlert className="w-5 h-5 text-red-500" /> },
-  ];
 
   const handleSearchCert = (e: React.FormEvent) => {
     e.preventDefault();
-    // This part stays simple for demo unless user provides certificate table structure
     if (searchCert === 'NIEM-2026-001') {
       setSearchResult({ name: 'นาย เต้ (Paramedic)', course: 'Technical Rescue Instructor', date: '12 เม.ย. 2026', status: 'Valid' });
     } else {
@@ -78,7 +89,7 @@ export default function App() {
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } })
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: prompt }] } })
       });
       if (!response.ok) throw new Error('API Error');
       const data = await response.json();
@@ -90,6 +101,16 @@ export default function App() {
     }
   };
 
+  // Helper to get Icon
+  const getSystemIcon = (name: string) => {
+    switch(name) {
+      case 'ShieldAlert': return <ShieldAlert className="w-5 h-5 text-red-500" />;
+      case 'Globe': return <Globe className="w-5 h-5 text-green-500" />;
+      case 'FileText': return <FileText className="w-5 h-5 text-blue-500" />;
+      default: return <Activity className="w-5 h-5 text-blue-500" />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col">
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -97,72 +118,80 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
         {activeTab === 'home' && (
           <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-slate-900 rounded-[2.5rem] shadow-2xl shadow-blue-900/10 overflow-hidden relative">
-              <div className="bg-blue-600/10 absolute inset-0 backdrop-blur-3xl animate-pulse"></div>
-              <div className="px-8 py-16 md:py-24 relative z-10 text-white max-w-3xl">
-                <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold mb-8 border border-blue-500/30 uppercase tracking-widest">
-                  <Activity className="w-3 h-3 mr-2" /> Official Training Center
+            {/* Hero Section - Compact Banner */}
+            <div className="bg-gradient-to-r from-blue-950 via-blue-900 to-slate-900 rounded-[2rem] shadow-2xl shadow-blue-900/10 overflow-hidden relative">
+              <div className="bg-blue-600/5 absolute inset-0 backdrop-blur-3xl"></div>
+              <div className="px-10 py-10 md:py-14 relative z-10 text-white max-w-4xl">
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-black mb-6 border border-blue-500/20 uppercase tracking-widest">
+                  <Activity className="w-3 h-3 mr-2 text-blue-400" /> Training & Excellence
                 </div>
-                <h1 className="text-4xl md:text-6xl font-black mb-6 leading-[1.1] tracking-tight text-white drop-shadow-sm">
-                  ศูนย์ฝึกอบรม <br/>
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-indigo-100 italic">NIEM Thailand</span>
+                <h1 className="text-3xl md:text-5xl font-black mb-4 leading-tight tracking-tight text-white">
+                  {heroData.title}
                 </h1>
-                <p className="text-blue-100/70 text-lg mb-10 leading-relaxed max-w-xl font-medium">
-                  ยกระดับมาตรฐานการแพทย์ฉุกเฉินนอกโรงพยาบาล สู่ความเป็นเลิศทางวิชาการและทักษะการกู้ชีพสากล
+                <p className="text-blue-100/60 text-sm md:text-base mb-8 leading-relaxed max-w-2xl font-medium">
+                  {heroData.subtitle}
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <button onClick={() => setActiveTab('courses')} className="bg-white text-blue-900 px-8 py-4 rounded-2xl font-black shadow-xl hover:bg-blue-50 transition transform hover:scale-105 active:scale-95 flex items-center">
-                    ดูตารางอบรมปี 2026
+                  <button onClick={() => setActiveTab('courses')} className="bg-blue-600 text-white px-8 py-3.5 rounded-2xl font-black text-sm shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition transform hover:-translate-y-0.5 active:scale-95 flex items-center">
+                    {heroData.button_text} <ChevronRight className="w-4 h-4 ml-2" />
                   </button>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* News Section */}
               <div className="md:col-span-2 bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
                 <div className="flex justify-between items-center mb-10">
                   <h2 className="text-2xl font-black text-slate-800 flex items-center tracking-tight">
                     <div className="w-2 h-8 bg-blue-600 rounded-full mr-4"></div>
                     ข่าวสารและประกาศ
                   </h2>
-                  <button className="px-4 py-2 hover:bg-slate-50 text-slate-400 text-xs font-bold rounded-xl transition uppercase tracking-widest">More</button>
+                  <Link href="/blog" className="px-4 py-2 hover:bg-slate-50 text-slate-400 text-xs font-bold rounded-xl transition uppercase tracking-widest">ดูทั้งหมด</Link>
                 </div>
                 <div className="space-y-6">
-                  {newsList.map(news => (
-                    <div key={news.id} className="group flex items-start justify-between cursor-pointer p-2 rounded-2xl hover:bg-slate-50/50 transition duration-300">
+                  {dbNews.length > 0 ? dbNews.map((news) => (
+                    <Link href={`/blog/${news.slug}`} key={news.id} className="group flex items-start justify-between cursor-pointer p-2 rounded-2xl hover:bg-slate-50/50 transition duration-300">
                       <div className="flex gap-6">
                         <div className="hidden sm:flex flex-col items-center justify-center p-3 bg-blue-50 rounded-2xl text-blue-600 min-w-[64px]">
-                          <span className="text-[10px] font-black uppercase tracking-widest">APR</span>
-                          <span className="text-xl font-black">19</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest">
+                            {new Date(news.created_at).toLocaleString('default', { month: 'short' }).toUpperCase()}
+                          </span>
+                          <span className="text-xl font-black">{new Date(news.created_at).getDate()}</span>
                         </div>
                         <div>
-                          <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-600 text-[10px] font-black rounded mb-2 uppercase tracking-widest">{news.type}</span>
+                          <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-600 text-[10px] font-black rounded mb-2 uppercase tracking-widest">{news.category}</span>
                           <h3 className="font-bold text-slate-800 text-lg leading-snug group-hover:text-blue-600 transition">{news.title}</h3>
                           <p className="text-xs text-slate-400 mt-2 font-medium flex items-center opacity-60">
-                            <Users className="w-3 h-3 mr-1" /> NIEM Admin • <Calendar className="w-3 h-3 mx-1" /> 2026
+                            <Users className="w-3 h-3 mr-1" /> {news.author} • <Calendar className="w-3 h-3 mx-1" /> 2026
                           </p>
                         </div>
                       </div>
                       <ChevronRight className="w-6 h-6 text-slate-200 group-hover:text-blue-600 transform group-hover:translate-x-1 transition" />
-                    </div>
-                  ))}
+                    </Link>
+                  )) : (
+                    <div className="py-10 text-center text-slate-400 font-bold italic">ยังไม่มีข่าวสารใหม่</div>
+                  )}
                 </div>
               </div>
 
+              {/* Information Systems Section */}
               <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
                 <h2 className="text-xl font-black text-slate-800 mb-8 flex items-center tracking-tight">
                   <LinkIcon className="w-5 h-5 mr-3 text-blue-600" /> ระบบสารสนเทศ
                 </h2>
                 <div className="space-y-4">
-                  {externalApps.map(app => (
-                    <div key={app.id} className="flex items-center p-5 border border-slate-50 rounded-3xl hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-900/5 transition cursor-pointer bg-slate-50/40 hover:bg-white active:scale-95 transform duration-300">
-                      <div className="bg-white p-3 rounded-2xl shadow-sm mr-5 text-blue-600 group-hover:scale-110 transition">{app.icon}</div>
+                  {dbSystems.length > 0 ? dbSystems.map((app) => (
+                    <a href={app.url} target="_blank" rel="noopener noreferrer" key={app.id} className="flex items-center p-5 border border-slate-50 rounded-3xl hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-900/5 transition cursor-pointer bg-slate-50/40 hover:bg-white active:scale-95 transform duration-300">
+                      <div className="bg-white p-3 rounded-2xl shadow-sm mr-5 text-blue-600 group-hover:scale-110 transition">{getSystemIcon(app.icon_name)}</div>
                       <div>
                         <h4 className="font-bold text-slate-700 text-sm">{app.name}</h4>
-                        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5">{app.desc}</p>
+                        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5">{app.description}</p>
                       </div>
-                    </div>
-                  ))}
+                    </a>
+                  )) : (
+                    <div className="py-10 text-center text-slate-400 font-bold italic">ไม่พบระบบสารสนเทศ</div>
+                  )}
                 </div>
               </div>
             </div>
