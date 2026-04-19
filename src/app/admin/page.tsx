@@ -511,8 +511,9 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
             </div>
-          </>
-        ) : activeTab === 'pages' ? (
+          </div>
+        </>
+      ) : activeTab === 'pages' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pages.map(page => (
               <div key={page.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col hover:shadow-md transition group">
