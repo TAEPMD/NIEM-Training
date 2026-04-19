@@ -131,7 +131,8 @@ export default function AdminDashboard() {
   const handleCourseSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isEditing) {
-      const { error } = await supabase.from('courses').update(currentCourse).eq('id', currentCourse.id);
+      const { id, ...updateData } = currentCourse;
+      const { error } = await supabase.from('courses').update(updateData).eq('id', id);
       if (error) alert(error.message);
       else setIsModalOpen(false);
     } else {
@@ -167,7 +168,8 @@ export default function AdminDashboard() {
     e.preventDefault();
     const now = new Date().toISOString();
     if (isEditing) {
-      const { error } = await supabase.from('pages').update({ ...currentPage, updated_at: now }).eq('id', currentPage.id);
+      const { id, ...updateData } = currentPage;
+      const { error } = await supabase.from('pages').update({ ...updateData, updated_at: now }).eq('id', id);
       if (error) alert(error.message);
       else setIsPageModalOpen(false);
     } else {
@@ -203,7 +205,8 @@ export default function AdminDashboard() {
     e.preventDefault();
     const now = new Date().toISOString();
     if (isEditing) {
-      const { error } = await supabase.from('blogs').update({ ...currentBlog, updated_at: now }).eq('id', currentBlog.id);
+      const { id, ...updateData } = currentBlog;
+      const { error } = await supabase.from('blogs').update({ ...updateData, updated_at: now }).eq('id', id);
       if (error) alert(error.message);
       else setIsBlogModalOpen(false);
     } else {
@@ -239,7 +242,8 @@ export default function AdminDashboard() {
     e.preventDefault();
     const now = new Date().toISOString();
     if (isEditing) {
-      const { error } = await supabase.from('systems').update({ ...currentSystem, updated_at: now }).eq('id', currentSystem.id);
+      const { id, ...updateData } = currentSystem;
+      const { error } = await supabase.from('systems').update({ ...updateData, updated_at: now }).eq('id', id);
       if (error) alert(error.message);
       else setIsSystemModalOpen(false);
     } else {
