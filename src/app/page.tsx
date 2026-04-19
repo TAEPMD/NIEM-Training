@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { 
   BookOpen, Calendar, Search, Link as LinkIcon, 
   Activity, Users, FileText, ChevronRight, ShieldAlert,
@@ -48,17 +49,13 @@ export default function App() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState('');
 
-  // Mock Data
+  const [coursesList, setCoursesList] = useState<CourseItem[]>([]);
+
+  // Static Data
   const newsList: NewsItem[] = [
     { id: 1, title: 'เปิดรับสมัครอบรม Technical Rescue (Rope Rescue Level 1)', date: '15 พ.ค. 2026', type: 'ประกาศ' },
     { id: 2, title: 'ปรับปรุงแนวทางปฏิบัติการแพทย์ฉุกเฉินนอกโรงพยาบาล ปี 2026', date: '10 พ.ค. 2026', type: 'วิชาการ' },
     { id: 3, title: 'ประกาศผลสอบ EMR / EMT รอบที่ 2/2026', date: '5 พ.ค. 2026', type: 'ผลการสอบ' },
-  ];
-
-  const coursesList: CourseItem[] = [
-    { id: 1, name: 'Basic Life Support (BLS) for Healthcare Providers', category: 'การแพทย์', status: 'เปิดรับสมัคร' },
-    { id: 2, name: 'Pre-Hospital Trauma Life Support (PHTLS)', category: 'การแพทย์', status: 'เต็มแล้ว' },
-    { id: 3, name: 'Vehicle Extrication & Technical Rescue', category: 'กู้ภัย', status: 'เปิดรับสมัคร' },
   ];
 
   const externalApps: ExternalApp[] = [
@@ -66,6 +63,22 @@ export default function App() {
     { id: 2, name: 'ระบบ D-E-M-S', desc: 'Disaster & Emergency Medical System', icon: <ShieldAlert className="w-6 h-6 text-red-500" /> },
     { id: 3, name: 'ระบบสารสนเทศ สพฉ.', desc: 'Intranet สำหรับเจ้าหน้าที่', icon: <Users className="w-6 h-6 text-green-500" /> },
   ];
+
+  // Load data from localStorage
+  useEffect(() => {
+    const savedCourses = localStorage.getItem('niem_courses');
+    if (savedCourses) {
+      setCoursesList(JSON.parse(savedCourses));
+    } else {
+      const initialCourses = [
+        { id: 1, name: 'Basic Life Support (BLS) for Healthcare Providers', category: 'การแพทย์', status: 'เปิดรับสมัคร' },
+        { id: 2, name: 'Pre-Hospital Trauma Life Support (PHTLS)', category: 'การแพทย์', status: 'เต็มแล้ว' },
+        { id: 3, name: 'Vehicle Extrication & Technical Rescue', category: 'กู้ภัย', status: 'เปิดรับสมัคร' },
+      ];
+      setCoursesList(initialCourses);
+      localStorage.setItem('niem_courses', JSON.stringify(initialCourses));
+    }
+  }, []);
 
   const handleSearchCert = (e: React.FormEvent) => {
     e.preventDefault();
@@ -354,6 +367,11 @@ export default function App() {
       <footer className="bg-slate-900 text-slate-400 py-8 text-center text-sm">
         <p>© 2026 ศูนย์ฝึกอบรม สถาบันการแพทย์ฉุกเฉินแห่งชาติ (NIEM Training Center)</p>
         <p className="mt-2">พัฒนาโดยใช้ Next.js, Tailwind CSS, และ Supabase</p>
+        <div className="mt-4">
+          <Link href="/admin" className="text-slate-600 hover:text-slate-300 transition underline underline-offset-4">
+            เข้าสู่ระบบเจ้าหน้าที่ (Admin Panel)
+          </Link>
+        </div>
       </footer>
     </div>
   );
