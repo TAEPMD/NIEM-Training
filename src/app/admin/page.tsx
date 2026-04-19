@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Plus, Search, Edit2, Trash2,
   Save, X, LayoutDashboard, BookOpen, Settings,
-  LogOut, Activity, Globe, Eye, Loader2, AlertTriangle
+  LogOut, Activity, Globe, Eye, Loader2, AlertTriangle,
+  FileText, Sparkles, Link as LinkIcon
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabase';
