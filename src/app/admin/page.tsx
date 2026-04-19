@@ -485,7 +485,16 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td className="px-8 py-4 flex justify-center space-x-2">
-                        <button onClick={() => handleEditCourse(course)} className="p-2        ) : activeTab === 'pages' ? (
+                        <button onClick={() => handleEditCourse(course)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDeleteCourse(course.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ) : activeTab === 'pages' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pages.map(page => (
               <div key={page.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col hover:shadow-md transition group">
@@ -793,8 +802,6 @@ on-500">
               <button type="submit" className="w-full py-5 bg-blue-600 text-white font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-200 transition">Save Blog Post</button>
             </form>
           </div>
-        </div>
-      )}
         </div>
       )}
 
