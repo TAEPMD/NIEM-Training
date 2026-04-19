@@ -103,7 +103,7 @@ export default function AdminDashboard() {
 
   const handlePinSubmit = async (val: string) => {
     // SHA-256 Hash of "140433"
-    const targetHash = "f11a806967732ef2160d5b62b78b0531551a3782ed0f4f91d6426463991807d7";
+    const targetHash = "6b5b5ebf8358ece5942f4f8a9b3fc65823b6b8ce93efaef74acee7d8f0ca013e";
     
     // Simple hash function using Web Crypto API
     const msgBuffer = new TextEncoder().encode(val);
