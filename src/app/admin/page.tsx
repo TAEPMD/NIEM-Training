@@ -625,35 +625,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         ) : (
-                <h3 className="font-bold text-lg text-slate-800 mb-1">{sys.name}</h3>
-                <p className="text-slate-500 text-xs mb-4 flex-grow">{sys.description}</p>
-                <div className="text-[10px] text-slate-300 font-bold uppercase tracking-widest pt-4 border-t border-slate-50 uppercase">
-                  URL: {sys.url}
-                </div>
-              </div>
-            ))}
-            {systems.length === 0 && !loading && (
-              <div className="md:col-span-3 py-12 text-center text-slate-400 italic text-sm">ไม่มีข้อมูลระบบสารสนเทศ</div>
-            )}
-          </div>
-        )
-on-500">
-            <h2 className="text-xl font-black text-slate-800 mb-6">คลังรูปภาพและสื่อ (Media Library)</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {blogs.filter(b => b.image_url).map(blog => (
-                <div key={blog.id} className="aspect-square rounded-2xl overflow-hidden border border-slate-100 shadow-sm relative group">
-                  <img src={blog.image_url} alt="Media" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center space-x-2">
-                    <button onClick={() => {navigator.clipboard.writeText(blog.image_url); alert('คัดลอก URL แล้ว');}} className="p-2 bg-white rounded-lg text-slate-900"><LinkIcon className="w-4 h-4" /></button>
-                  </div>
-                </div>
-              ))}
-              <div className="aspect-square rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300 hover:border-blue-400 hover:text-blue-400 transition cursor-pointer">
-                <Plus className="w-8 h-8 mb-1" />
-                <span className="text-[10px] font-black uppercase">Upload</span>
-              </div>
-            </div>
-          </div>
+          <div className="py-12 text-center text-slate-400 italic">เลือกเมนูเพื่อจัดการข้อมูล</div>
         )}
       </main>
 
