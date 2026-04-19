@@ -3,16 +3,17 @@
 import React, { useState, useEffect, use } from 'react';
 import Navbar from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import { FileText, ArrowLeft, ArrowRight } from 'lucide-react';
+import { FileText, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { supabase } from '@/utils/supabase';
 
 interface PageData {
   title: string;
   slug: string;
   content: string;
   status: string;
-  updatedAt: string;
+  updated_at: string;
 }
 
 export default function DynamicPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -21,20 +22,29 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem('niem_pages');
-    if (saved) {
-      const pages = JSON.parse(saved);
-      const found = pages.find((p: PageData) => p.slug === slug && p.status === 'Published');
-      if (found) {
-        setPage(found);
+    const fetchPage = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('pages')
+        .select('*')
+        .eq('slug', slug)
+        .eq('status', 'Published')
+        .single();
+      
+      if (!error && data) {
+        setPage(data);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    fetchPage();
   }, [slug]);
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="animate-pulse text-blue-600 font-bold">กำลังโหลด...</div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 overflow-hidden relative">
+      <div className="absolute inset-0 bg-blue-600/5 backdrop-blur-3xl animate-pulse"></div>
+      <Loader2 className="w-16 h-16 text-blue-500 animate-spin relative z-10" />
+      <div className="text-blue-200/50 mt-4 font-black uppercase tracking-[0.5em] text-xs relative z-10">Authenticating Content</div>
     </div>
   );
 
@@ -46,34 +56,39 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <Navbar />
 
-      <main className="flex-grow py-12 px-4 shadow-sm">
-        <article className="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
+      <main className="flex-grow py-16 px-4">
+        <article className="max-w-5xl mx-auto bg-white rounded-[3rem] shadow-2xl shadow-blue-900/5 overflow-hidden border border-slate-100 animate-in slide-in-from-bottom-8 duration-700">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-900 to-blue-700 p-8 md:p-12 text-white">
-            <Link href="/" className="inline-flex items-center text-blue-200 hover:text-white transition mb-6 text-sm">
-              <ArrowLeft className="w-4 h-4 mr-2" /> กลับสู่หน้าหลัก
+          <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-12 md:p-20 text-white relative">
+            <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+              <FileText className="w-64 h-64" />
+            </div>
+            <Link href="/" className="inline-flex items-center text-blue-300 hover:text-white transition-all mb-10 text-xs font-black uppercase tracking-widest bg-white/5 px-4 py-2 rounded-xl border border-white/10 hover:bg-white/10">
+              <ArrowLeft className="w-4 h-4 mr-2" /> Back to portal
             </Link>
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">
+            <h1 className="text-4xl md:text-7xl font-black tracking-tight mb-8 leading-tight">
               {page.title}
             </h1>
-            <div className="flex items-center text-blue-300 text-sm">
-              <FileText className="w-4 h-4 mr-2" /> อัปเดตล่าสุดเมื่อ {page.updatedAt}
+            <div className="flex items-center text-blue-300/60 text-xs font-black uppercase tracking-[0.2em] bg-black/20 w-fit px-4 py-2 rounded-full backdrop-blur-md">
+              <FileText className="w-3 h-3 mr-2" /> Last Updated {new Date(page.updated_at).toLocaleDateString()}
             </div>
           </div>
 
           {/* Content */}
-          <div className="p-8 md:p-12 prose prose-blue max-w-none prose-slate">
+          <div className="p-12 md:p-20">
             <div 
-              className="text-slate-700 leading-relaxed text-lg whitespace-pre-line"
+              className="text-slate-700 leading-[1.8] text-lg lg:text-xl whitespace-pre-line font-medium"
               dangerouslySetInnerHTML={{ __html: page.content }}
             />
           </div>
 
-          {/* Simple CTA */}
-          <div className="p-8 md:p-12 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
-            <div className="text-slate-500 text-sm">สถาบันการแพทย์ฉุกเฉินแห่งชาติ (สพฉ.)</div>
-            <Link href="/" className="px-6 py-2 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 transition flex items-center text-sm">
-              กลับหน้าหลัก <ArrowRight className="w-4 h-4 ml-2" />
+          {/* Footer Info */}
+          <div className="p-12 md:p-20 bg-slate-50/50 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="text-slate-400 text-xs font-bold uppercase tracking-widest">
+              NIEM Official Document • 2026 Registry
+            </div>
+            <Link href="/" className="px-10 py-5 bg-blue-600 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] hover:bg-blue-700 shadow-2xl shadow-blue-500/20 transition transform hover:scale-105 active:scale-95 text-xs">
+              Return Home
             </Link>
           </div>
         </article>

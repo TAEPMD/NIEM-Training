@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Activity } from 'lucide-react';
+import { supabase } from '@/utils/supabase';
 
 interface NavPage {
   title: string;
@@ -13,10 +14,15 @@ export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string
   const [dynamicPages, setDynamicPages] = useState<NavPage[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('niem_pages');
-    if (saved) {
-      setDynamicPages(JSON.parse(saved).filter((p: any) => p.status === 'Published'));
-    }
+    const fetchPages = async () => {
+      const { data } = await supabase
+        .from('pages')
+        .select('title, slug')
+        .eq('status', 'Published')
+        .order('id', { ascending: true });
+      if (data) setDynamicPages(data);
+    };
+    fetchPages();
   }, []);
 
   return (
@@ -26,23 +32,23 @@ export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string
           <Link href="/" className="flex items-center cursor-pointer">
             <Activity className="w-8 h-8 mr-2 text-red-400" />
             <div>
-              <span className="font-bold text-xl tracking-wider">NIEM</span>
-              <span className="font-light text-blue-200 ml-1">TRAINING CENTER</span>
+              <span className="font-bold text-xl tracking-wider uppercase">Niem</span>
+              <span className="font-light text-blue-200 ml-1 text-xs tracking-widest uppercase">Center</span>
             </div>
           </Link>
-          <div className="hidden md:flex space-x-1 items-center font-sans">
-            <Link href="/" onClick={() => setActiveTab?.('home')} className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'home' ? 'bg-blue-800' : 'hover:bg-blue-800'}`}>หน้าแรก</Link>
-            <Link href="/" onClick={() => setActiveTab?.('courses')} className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'courses' ? 'bg-blue-800' : 'hover:bg-blue-800'}`}>หลักสูตร</Link>
-            <Link href="/" onClick={() => setActiveTab?.('cert')} className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'cert' ? 'bg-blue-800' : 'hover:bg-blue-800'}`}>ค้นหาใบประกาศฯ</Link>
+          <div className="hidden md:flex space-x-1 items-center font-sans tracking-tight">
+            <Link href="/" onClick={() => setActiveTab?.('home')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'home' ? 'bg-white/10 text-white' : 'text-blue-200 hover:text-white hover:bg-white/5'}`}>หน้าแรก</Link>
+            <Link href="/" onClick={() => setActiveTab?.('courses')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'courses' ? 'bg-white/10 text-white' : 'text-blue-200 hover:text-white hover:bg-white/5'}`}>หลักสูตร</Link>
+            <Link href="/" onClick={() => setActiveTab?.('cert')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'cert' ? 'bg-white/10 text-white' : 'text-blue-200 hover:text-white hover:bg-white/5'}`}>ค้นหาใบประกาศฯ</Link>
             
             {/* Dynamic Pages */}
             {dynamicPages.map(page => (
-              <Link key={page.slug} href={`/${page.slug}`} className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-800">
+              <Link key={page.slug} href={`/${page.slug}`} className="px-4 py-2 rounded-xl text-sm font-bold text-blue-200 hover:text-white hover:bg-white/5 transition-all">
                 {page.title}
               </Link>
             ))}
 
-            <button className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md text-sm font-bold transition-colors shadow-sm">เข้าสู่ระบบ</button>
+            <button className="ml-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-95">User Portal</button>
           </div>
         </div>
       </div>

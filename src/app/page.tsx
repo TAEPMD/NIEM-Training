@@ -8,6 +8,7 @@ import {
   Activity, Users, FileText, ChevronRight, ShieldAlert,
   Award, ArrowRight, Sparkles, Loader2
 } from 'lucide-react';
+import { supabase } from '@/utils/supabase';
 
 // Define types
 interface NewsItem { id: number; title: string; date: string; type: string; }
@@ -27,38 +28,35 @@ export default function App() {
   const [aiError, setAiError] = useState('');
 
   const [coursesList, setCoursesList] = useState<CourseItem[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(false);
 
-  // Static Data
+  // Load production data from Supabase
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setLoadingCourses(true);
+      const { data, error } = await supabase.from('courses').select('*').limit(6);
+      if (!error && data) {
+        setCoursesList(data);
+      }
+      setLoadingCourses(false);
+    };
+
+    fetchCourses();
+  }, []);
+
+  // Production-ready static data (simplified or can be moved to DB too)
   const newsList: NewsItem[] = [
-    { id: 1, title: 'เปิดรับสมัครอบรม Technical Rescue (Rope Rescue Level 1)', date: '15 พ.ค. 2026', type: 'ประกาศ' },
-    { id: 2, title: 'ปรับปรุงแนวทางปฏิบัติการแพทย์ฉุกเฉินนอกโรงพยาบาล ปี 2026', date: '10 พ.ค. 2026', type: 'วิชาการ' },
-    { id: 3, title: 'ประกาศผลสอบ EMR / EMT รอบที่ 2/2026', date: '5 พ.ค. 2026', type: 'ผลการสอบ' },
+    { id: 1, title: 'ประชาสัมพันธ์หลักสูตรการแพทย์ฉุกเฉินใหม่ล่าสุด 2026', date: 'วันนี้', type: 'ประกาศ' },
   ];
 
   const externalApps: ExternalApp[] = [
-    { id: 1, name: 'ระบบ ITEMS', desc: 'ระบบจัดการข้อมูลผู้ป่วยฉุกเฉิน', icon: <Activity className="w-6 h-6 text-blue-500" /> },
-    { id: 2, name: 'ระบบ D-E-M-S', desc: 'Disaster & Emergency Medical System', icon: <ShieldAlert className="w-6 h-6 text-red-500" /> },
-    { id: 3, name: 'ระบบสารสนเทศ สพฉ.', desc: 'Intranet สำหรับเจ้าหน้าที่', icon: <Users className="w-6 h-6 text-green-500" /> },
+    { id: 1, name: 'ระบบ ITEMS', desc: 'ข้อมูลผู้ป่วยฉุกเฉิน', icon: <Activity className="w-5 h-5 text-blue-500" /> },
+    { id: 2, name: 'ระบบ D-E-M-S', desc: 'Disaster Management', icon: <ShieldAlert className="w-5 h-5 text-red-500" /> },
   ];
-
-  // Load data from localStorage
-  useEffect(() => {
-    const savedCourses = localStorage.getItem('niem_courses');
-    if (savedCourses) {
-      setCoursesList(JSON.parse(savedCourses));
-    } else {
-      const initialCourses = [
-        { id: 1, name: 'Basic Life Support (BLS) for Healthcare Providers', category: 'การแพทย์', status: 'เปิดรับสมัคร' },
-        { id: 2, name: 'Pre-Hospital Trauma Life Support (PHTLS)', category: 'การแพทย์', status: 'เต็มแล้ว' },
-        { id: 3, name: 'Vehicle Extrication & Technical Rescue', category: 'กู้ภัย', status: 'เปิดรับสมัคร' },
-      ];
-      setCoursesList(initialCourses);
-      localStorage.setItem('niem_courses', JSON.stringify(initialCourses));
-    }
-  }, []);
 
   const handleSearchCert = (e: React.FormEvent) => {
     e.preventDefault();
+    // This part stays simple for demo unless user provides certificate table structure
     if (searchCert === 'NIEM-2026-001') {
       setSearchResult({ name: 'นาย เต้ (Paramedic)', course: 'Technical Rescue Instructor', date: '12 เม.ย. 2026', status: 'Valid' });
     } else {
@@ -86,7 +84,7 @@ export default function App() {
       const data = await response.json();
       setAiResponse(data.candidates?.[0]?.content?.parts?.[0]?.text || "ขออภัย ไม่สามารถให้คำแนะนำได้ในขณะนี้");
     } catch (err) {
-      setAiError(err instanceof Error && err.message === 'Missing API Key' ? 'กรุณาตั้งค่า API Key' : 'เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI');
+      setAiError('เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI');
     } finally {
       setIsAiLoading(false);
     }
@@ -98,50 +96,70 @@ export default function App() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
         {activeTab === 'home' && (
-          <div className="space-y-8">
-            <div className="bg-gradient-to-r from-blue-800 to-blue-600 rounded-3xl shadow-xl overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                <ShieldAlert className="w-64 h-64 text-white" />
-              </div>
-              <div className="px-8 py-12 relative z-10 text-white">
-                <h1 className="text-3xl md:text-4xl font-bold mb-4">ศูนย์ฝึกอบรมสถาบันการแพทย์ฉุกเฉินแห่งชาติ</h1>
-                <p className="text-blue-100 max-w-2xl text-lg mb-8">ยกระดับมาตรฐานการแพทย์ฉุกเฉินนอกโรงพยาบาล สู่ความเป็นเลิศทางวิชาการและทักษะการกู้ชีพ</p>
+          <div className="space-y-8 animate-in fade-in duration-500">
+            <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-slate-900 rounded-[2.5rem] shadow-2xl shadow-blue-900/10 overflow-hidden relative">
+              <div className="bg-blue-600/10 absolute inset-0 backdrop-blur-3xl animate-pulse"></div>
+              <div className="px-8 py-16 md:py-24 relative z-10 text-white max-w-3xl">
+                <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold mb-8 border border-blue-500/30 uppercase tracking-widest">
+                  <Activity className="w-3 h-3 mr-2" /> Official Training Center
+                </div>
+                <h1 className="text-4xl md:text-6xl font-black mb-6 leading-[1.1] tracking-tight text-white drop-shadow-sm">
+                  ศูนย์ฝึกอบรม <br/>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-indigo-100 italic">NIEM Thailand</span>
+                </h1>
+                <p className="text-blue-100/70 text-lg mb-10 leading-relaxed max-w-xl font-medium">
+                  ยกระดับมาตรฐานการแพทย์ฉุกเฉินนอกโรงพยาบาล สู่ความเป็นเลิศทางวิชาการและทักษะการกู้ชีพสากล
+                </p>
                 <div className="flex flex-wrap gap-4">
-                  <button onClick={() => setActiveTab('courses')} className="bg-white text-blue-900 px-6 py-3 rounded-xl font-bold shadow-md hover:bg-blue-50 transition flex items-center"><Calendar className="w-5 h-5 mr-2" /> ดูตารางอบรม</button>
-                  <button onClick={() => setActiveTab('cert')} className="bg-blue-700 text-white border border-blue-500 px-6 py-3 rounded-xl font-medium hover:bg-blue-800 transition flex items-center"><Award className="w-5 h-5 mr-2" /> ตรวจสอบใบประกาศฯ</button>
+                  <button onClick={() => setActiveTab('courses')} className="bg-white text-blue-900 px-8 py-4 rounded-2xl font-black shadow-xl hover:bg-blue-50 transition transform hover:scale-105 active:scale-95 flex items-center">
+                    ดูตารางอบรมปี 2026
+                  </button>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="md:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold text-slate-800 flex items-center"><FileText className="w-5 h-5 mr-2 text-blue-600" /> ข่าวสารประชาสัมพันธ์</h2>
-                  <button className="text-sm text-blue-600 hover:text-blue-800">ดูทั้งหมด</button>
+              <div className="md:col-span-2 bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
+                <div className="flex justify-between items-center mb-10">
+                  <h2 className="text-2xl font-black text-slate-800 flex items-center tracking-tight">
+                    <div className="w-2 h-8 bg-blue-600 rounded-full mr-4"></div>
+                    ข่าวสารและประกาศ
+                  </h2>
+                  <button className="px-4 py-2 hover:bg-slate-50 text-slate-400 text-xs font-bold rounded-xl transition uppercase tracking-widest">More</button>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {newsList.map(news => (
-                    <div key={news.id} className="group border-b border-slate-50 last:border-0 pb-4 last:pb-0 flex items-start justify-between cursor-pointer">
-                      <div>
-                        <span className="inline-block px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded mb-2 uppercase">{news.type}</span>
-                        <h3 className="font-medium text-slate-800 group-hover:text-blue-600 transition">{news.title}</h3>
-                        <p className="text-xs text-slate-400 mt-1">{news.date}</p>
+                    <div key={news.id} className="group flex items-start justify-between cursor-pointer p-2 rounded-2xl hover:bg-slate-50/50 transition duration-300">
+                      <div className="flex gap-6">
+                        <div className="hidden sm:flex flex-col items-center justify-center p-3 bg-blue-50 rounded-2xl text-blue-600 min-w-[64px]">
+                          <span className="text-[10px] font-black uppercase tracking-widest">APR</span>
+                          <span className="text-xl font-black">19</span>
+                        </div>
+                        <div>
+                          <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-600 text-[10px] font-black rounded mb-2 uppercase tracking-widest">{news.type}</span>
+                          <h3 className="font-bold text-slate-800 text-lg leading-snug group-hover:text-blue-600 transition">{news.title}</h3>
+                          <p className="text-xs text-slate-400 mt-2 font-medium flex items-center opacity-60">
+                            <Users className="w-3 h-3 mr-1" /> NIEM Admin • <Calendar className="w-3 h-3 mx-1" /> 2026
+                          </p>
+                        </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500" />
+                      <ChevronRight className="w-6 h-6 text-slate-200 group-hover:text-blue-600 transform group-hover:translate-x-1 transition" />
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-                <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center"><LinkIcon className="w-5 h-5 mr-2 text-blue-600" /> ระบบที่เกี่ยวข้อง</h2>
+              <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
+                <h2 className="text-xl font-black text-slate-800 mb-8 flex items-center tracking-tight">
+                  <LinkIcon className="w-5 h-5 mr-3 text-blue-600" /> ระบบสารสนเทศ
+                </h2>
                 <div className="space-y-4">
                   {externalApps.map(app => (
-                    <div key={app.id} className="flex items-center p-4 border border-slate-50 rounded-2xl hover:border-blue-100 hover:shadow-md transition cursor-pointer bg-slate-50 hover:bg-white">
-                      <div className="bg-white p-2 rounded-xl shadow-sm mr-4">{app.icon}</div>
+                    <div key={app.id} className="flex items-center p-5 border border-slate-50 rounded-3xl hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-900/5 transition cursor-pointer bg-slate-50/40 hover:bg-white active:scale-95 transform duration-300">
+                      <div className="bg-white p-3 rounded-2xl shadow-sm mr-5 text-blue-600 group-hover:scale-110 transition">{app.icon}</div>
                       <div>
                         <h4 className="font-bold text-slate-700 text-sm">{app.name}</h4>
-                        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{app.desc}</p>
+                        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5">{app.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -152,57 +170,74 @@ export default function App() {
         )}
 
         {activeTab === 'courses' && (
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 min-h-[60vh]">
-            <div className="mb-10 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-3xl p-8 border border-indigo-100 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><Sparkles className="w-48 h-48 text-indigo-500" /></div>
-              <div className="relative z-10">
-                <div className="flex items-center mb-3 text-indigo-600"><Sparkles className="w-6 h-6 mr-2 font-bold" /><h3 className="text-xl font-bold">AI Course Recommender</h3></div>
-                <p className="text-indigo-700 text-sm mb-6 max-w-2xl font-medium">แนะนำหลักสูตรที่เหมาะสมกับเป้าหมายของคุณด้วย AI อัจฉริยะ</p>
+          <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8 min-h-[60vh] animate-in slide-in-from-bottom-4 duration-500">
+            <div className="mb-12 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-[2rem] p-10 border border-indigo-100 shadow-2xl shadow-blue-900/10 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><Sparkles className="w-64 h-64 text-white" /></div>
+              <div className="relative z-10 max-w-2xl">
+                <div className="flex items-center mb-3 text-blue-200"><Sparkles className="w-6 h-6 mr-3 font-bold" /><h3 className="text-xl font-black uppercase tracking-tight">AI Pathway Assistant</h3></div>
+                <p className="text-blue-100/80 text-lg mb-8 leading-relaxed font-medium italic">"ค้นหาหลักสูตรที่ช่วยเติมเต็มศักยภาพของคุณด้วยระบบ AI วิเคราะห์เส้นทางการเรียนรู้"</p>
                 <div className="flex flex-col md:flex-row gap-3">
-                  <input type="text" value={aiQuery} onChange={(e) => setAiQuery(e.target.value)} placeholder="เล่าประสบการณ์หรือความสนใจของคุณ..." className="flex-grow px-6 py-4 rounded-2xl border border-indigo-100 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition" onKeyDown={(e) => e.key === 'Enter' && handleAiRecommendation()} />
-                  <button onClick={handleAiRecommendation} disabled={isAiLoading || !aiQuery.trim()} className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-200 text-white font-bold py-4 px-8 rounded-2xl transition shadow-lg flex items-center justify-center">{isAiLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'ขอคำแนะนำ ✨'}</button>
+                  <input type="text" value={aiQuery} onChange={(e) => setAiQuery(e.target.value)} placeholder="เล่าประสบการณ์หรือทักษะที่อยากฝึกฝน..." className="flex-grow px-6 py-5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:ring-4 focus:ring-white/10 outline-none shadow-sm transition backdrop-blur-md" onKeyDown={(e) => e.key === 'Enter' && handleAiRecommendation()} />
+                  <button onClick={handleAiRecommendation} disabled={isAiLoading || !aiQuery.trim()} className="bg-white hover:bg-blue-50 disabled:bg-white/50 text-blue-900 font-black px-10 rounded-2xl transition shadow-lg flex items-center justify-center h-[64px]">{isAiLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'วิเคราะห์ทางเลือก'}</button>
                 </div>
-                {aiResponse && <div className="mt-8 p-6 bg-white/80 backdrop-blur rounded-2xl border border-indigo-100 text-slate-700 whitespace-pre-line leading-relaxed font-medium text-sm shadow-sm">{aiResponse}</div>}
+                {aiResponse && <div className="mt-8 p-8 bg-black/10 backdrop-blur-md rounded-2xl border border-white/10 text-white leading-relaxed font-medium text-sm shadow-inner">{aiResponse}</div>}
               </div>
             </div>
 
-            <h2 className="text-2xl font-bold text-slate-800 mb-8 flex items-center"><BookOpen className="w-6 h-6 mr-3 text-blue-600" /> หลักสูตรและตารางฝึกอบรม</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {coursesList.map(course => (
-                <div key={course.id} className="bg-white border border-slate-100 rounded-3xl p-6 hover:shadow-2xl hover:shadow-blue-900/5 transition group flex flex-col">
-                  <div className="flex justify-between items-start mb-6">
-                    <span className="bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg">{course.category}</span>
-                    <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg ${course.status === 'เปิดรับสมัคร' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{course.status}</span>
+            <h2 className="text-3xl font-black text-slate-800 mb-10 flex items-center tracking-tight">
+               <div className="w-2 h-8 bg-blue-600 rounded-full mr-4"></div>
+               ตารางหลักสูตรการอบรม
+            </h2>
+            
+            {loadingCourses ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[1,2,3].map(i => <div key={i} className="h-64 bg-slate-50 animate-pulse rounded-[2rem]"></div>)}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {coursesList.map(course => (
+                  <div key={course.id} className="bg-white border border-slate-100 rounded-[2.2rem] p-8 hover:shadow-[0_20px_50px_rgba(37,99,235,0.08)] transition duration-500 group flex flex-col transform hover:-translate-y-2">
+                    <div className="flex justify-between items-start mb-8">
+                      <span className="bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-xl border border-blue-100">{course.category}</span>
+                      <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-xl ${course.status === 'เปิดรับสมัคร' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{course.status}</span>
+                    </div>
+                    <h3 className="font-bold text-xl text-slate-800 mb-8 flex-grow leading-tight group-hover:text-blue-600 transition duration-300">{course.name}</h3>
+                    <button className="w-full py-5 bg-slate-50 hover:bg-blue-600 hover:text-white text-slate-500 font-black rounded-[1.5rem] transition-all flex justify-center items-center shadow-inner group-hover:shadow-blue-200">
+                      ดูรายละเอียด <ArrowRight className="w-4 h-4 ml-3" />
+                    </button>
                   </div>
-                  <h3 className="font-bold text-lg text-slate-800 mb-6 flex-grow leading-tight group-hover:text-blue-600 transition">{course.name}</h3>
-                  <button className="w-full py-4 bg-slate-50 hover:bg-blue-600 hover:text-white text-slate-600 rounded-2xl font-bold transition flex justify-center items-center">รายละเอียด <ArrowRight className="w-4 h-4 ml-2" /></button>
-                </div>
-              ))}
-            </div>
+                ))}
+                {coursesList.length === 0 && <div className="md:col-span-3 text-center py-20 text-slate-400 font-bold italic">ไม่พบข้อมูลหลักสูตรในขณะนี้</div>}
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === 'cert' && (
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-12 min-h-[60vh] flex flex-col items-center">
-            <Award className="w-20 h-20 text-blue-100 mb-6" />
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">ตรวจสอบประกาศนียบัตร</h2>
-            <p className="text-slate-400 mb-10 text-center max-w-sm text-sm font-medium">กรุณากรอกรหัสใบประกาศฯ เพื่อตรวจสอบความถูกต้องในระบบ</p>
+          <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-12 min-h-[60vh] flex flex-col items-center animate-in zoom-in-95 duration-500">
+            <div className="relative mb-10">
+              <div className="absolute inset-0 bg-blue-500 blur-[60px] opacity-10 rounded-full scale-150"></div>
+              <Award className="w-24 h-24 text-blue-600 relative z-10" />
+            </div>
+            <h2 className="text-3xl font-black text-slate-800 mb-3 tracking-tight">ตรวจสอบความถูกต้อง</h2>
+            <p className="text-slate-400 mb-12 text-center max-w-sm text-sm font-bold uppercase tracking-wider opacity-60">Authentication System</p>
             <form onSubmit={handleSearchCert} className="w-full max-w-md">
-              <div className="relative">
-                <input type="text" value={searchCert} onChange={(e) => setSearchCert(e.target.value)} placeholder="เช่น NIEM-2026-001" className="w-full pl-14 pr-6 py-5 rounded-3xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 outline-none transition shadow-inner font-bold" required />
-                <Search className="w-6 h-6 text-slate-300 absolute left-5 top-4.5" />
+              <div className="relative group">
+                <input type="text" value={searchCert} onChange={(e) => setSearchCert(e.target.value)} placeholder="CERTIFICATE ID (เช่น NIEM-2026-001)" className="w-full pl-16 pr-6 py-6 rounded-[2rem] bg-slate-50 border-none focus:ring-4 focus:ring-blue-100 outline-none transition-all shadow-inner font-bold text-slate-700" required />
+                <Search className="w-6 h-6 text-slate-300 absolute left-6 top-6 group-focus-within:text-blue-600 transition" />
               </div>
-              <button type="submit" className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] py-5 rounded-3xl transition shadow-xl shadow-blue-200 transform hover:scale-[1.02] active:scale-[0.98]">ค้นหาข้อมูล</button>
+              <button type="submit" className="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.3em] py-6 rounded-[2rem] transition shadow-2xl shadow-blue-400/30 transform hover:scale-[1.03] active:scale-[0.97]">Verify Now</button>
             </form>
             {searchResult && (
-              <div className="mt-12 w-full max-w-md">
-                {searchResult.error ? <div className="bg-red-50 text-red-600 p-4 rounded-2xl border border-red-100 text-center font-bold">{searchResult.error}</div> : (
-                  <div className="bg-green-50 border border-green-100 rounded-3xl p-8 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 bg-green-500 text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-bl-2xl shadow-lg">{searchResult.status}</div>
-                    <h4 className="text-xs font-black text-green-600 uppercase tracking-widest mb-6">Verified Certificate</h4>
-                    <div className="space-y-4">
-                      <div className="flex flex-col"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Name</span><span className="font-bold text-slate-800">{searchResult.name}</span></div>
-                      <div className="flex flex-col"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Course</span><span className="font-bold text-slate-700 text-sm">{searchResult.course}</span></div>
+              <div className="mt-16 w-full max-w-md">
+                {searchResult.error ? <div className="bg-red-50 text-red-600 p-6 rounded-[2rem] border border-red-100 text-center font-black animate-in shake-in">{searchResult.error}</div> : (
+                  <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-10 relative overflow-hidden shadow-2xl">
+                    <div className="absolute top-0 right-0 bg-blue-600 text-white px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] rounded-bl-3xl shadow-xl">{searchResult.status}</div>
+                    <Activity className="w-24 h-24 absolute -bottom-8 -left-8 text-blue-500/10 pointer-events-none" />
+                    <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-10">Verification Result</h4>
+                    <div className="space-y-8 relative z-10">
+                      <div className="flex flex-col"><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Participant</span><span className="font-black text-white text-2xl tracking-tight">{searchResult.name}</span></div>
+                      <div className="flex flex-col"><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Accredited Course</span><span className="font-bold text-blue-200 text-lg leading-tight">{searchResult.course}</span></div>
                     </div>
                   </div>
                 )}
