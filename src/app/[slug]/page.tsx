@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import Navbar from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import { FileText, ArrowLeft, Loader2, Calendar, User, Share2 } from 'lucide-react';
+import { FileText, ArrowLeft, Loader2, Calendar, User, Share2, Activity, Award } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabase } from '@/utils/supabase';
