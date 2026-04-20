@@ -118,22 +118,22 @@ export default function App() {
         {activeTab === 'home' && (
           <div className="space-y-24 animate-in fade-in duration-700">
             {/* Hero Section */}
-            <section className="max-w-7xl mx-auto px-6 lg:px-8">
-              <div className="relative rounded-[3.5rem] overflow-hidden bg-slate-900 aspect-[16/9] md:aspect-[21/9] flex items-center shadow-2xl">
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="relative rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-slate-900 min-h-[550px] md:min-h-[700px] py-16 md:py-24 flex items-center shadow-2xl animate-scale-in">
                 {/* Background Pattern/Glow */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-950 via-slate-900 to-indigo-950"></div>
-                <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-blue-600/10 to-transparent"></div>
-                <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-red-600/10 blur-[120px] rounded-full animate-pulse"></div>
+                <div className="absolute top-0 right-0 w-full md:w-[60%] h-full bg-gradient-to-l md:bg-gradient-to-l from-blue-600/20 to-transparent"></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 md:w-96 md:h-96 bg-red-600/10 blur-[80px] md:blur-[120px] rounded-full animate-pulse"></div>
                 
-                <div className="relative z-10 px-8 md:px-20 text-white w-full max-w-4xl">
-                  <div className="inline-flex items-center px-4 py-2 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md mb-8 animate-in slide-in-from-bottom-2 duration-500">
-                    <div className="w-2 h-2 rounded-full bg-blue-400 animate-ping mr-3"></div>
-                    <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-blue-300">
+                <div className="relative z-10 px-6 sm:px-10 md:px-20 text-white w-full max-w-4xl">
+                  <div className="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md mb-6 md:mb-8 animate-fade-in-up">
+                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-blue-400 animate-ping mr-2 md:mr-3"></div>
+                    <span className="text-[9px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-blue-300">
                       Emergency Medical Excellence
                     </span>
                   </div>
                   
-                  <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-8 leading-[1] tracking-tight">
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 md:mb-8 leading-[1.1] md:leading-[1] tracking-tight animate-fade-in-up delay-100">
                     {heroData.title.split(' ').map((word: string, i: number) => (
                       <React.Fragment key={i}>
                         <span className={i === 1 ? 'text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400' : 'text-white'}>
@@ -143,15 +143,15 @@ export default function App() {
                     ))}
                   </h1>
                   
-                  <p className="text-slate-400 text-sm md:text-xl mb-12 leading-relaxed max-w-2xl font-medium">
+                  <p className="text-slate-300 text-sm md:text-lg lg:text-xl mb-10 md:mb-12 leading-relaxed max-w-2xl font-medium animate-fade-in-up delay-200">
                     {heroData.subtitle}
                   </p>
                   
-                  <div className="flex flex-col sm:flex-row gap-6">
-                    <button onClick={() => setActiveTab('courses')} className="group bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-blue-600/30 transition-all duration-300 flex items-center justify-center transform hover:-translate-y-1">
-                      {heroData.button_text} <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 animate-fade-in-up delay-300">
+                    <button onClick={() => setActiveTab('courses')} className="group bg-blue-600 hover:bg-blue-700 text-white px-8 md:px-10 py-4 md:py-5 rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-widest shadow-xl shadow-blue-600/30 transition-all duration-300 flex items-center justify-center transform hover:-translate-y-1">
+                      {heroData.button_text} <ChevronRight className="w-4 h-4 md:w-5 md:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                     </button>
-                    <button onClick={() => setActiveTab('cert')} className="px-10 py-5 rounded-2xl bg-white/5 hover:bg-white/10 text-white border border-white/5 font-black text-sm uppercase tracking-widest backdrop-blur-md transition-all flex items-center justify-center">
+                    <button onClick={() => setActiveTab('cert')} className="px-8 md:px-10 py-4 md:py-5 rounded-2xl bg-white/5 hover:bg-white/10 text-white border border-white/10 font-black text-[10px] md:text-sm uppercase tracking-widest backdrop-blur-md transition-all duration-300 flex items-center justify-center transform hover:-translate-y-1">
                       {heroData.button2_text}
                     </button>
                   </div>
@@ -175,20 +175,20 @@ export default function App() {
             </section>
 
             {/* Quick Stats Section */}
-            <section className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
               {[
-                { label: 'เจ้าหน้าที่ทีมรุก', value: '4,500', sub: 'Active Personnel', icon: <Users className="text-blue-600"/>, color: 'blue' },
-                { label: 'หลักสูตรรับรอง', value: '86', sub: 'Certified Programs', icon: <Award className="text-emerald-600"/>, color: 'emerald' },
-                { label: 'สถาบันเครือข่าย', value: '120', sub: 'Partner Institutions', icon: <Building2 className="text-indigo-600"/>, color: 'indigo' },
-                { label: 'อัตราความสำเร็จ', value: '94%', sub: 'Survival Rate Impact', icon: <TrendingUp className="text-rose-600"/>, color: 'rose' },
+                { label: 'เจ้าหน้าที่ทีมรุก', value: '4,500', sub: 'Active Personnel', icon: <Users className="text-blue-600 w-6 h-6 md:w-8 md:h-8"/>, color: 'blue' },
+                { label: 'หลักสูตรรับรอง', value: '86', sub: 'Certified Programs', icon: <Award className="text-emerald-600 w-6 h-6 md:w-8 md:h-8"/>, color: 'emerald' },
+                { label: 'สถาบันเครือข่าย', value: '120', sub: 'Partner Institutions', icon: <Building2 className="text-indigo-600 w-6 h-6 md:w-8 md:h-8"/>, color: 'indigo' },
+                { label: 'อัตราความสำเร็จ', value: '94%', sub: 'Survival Rate Impact', icon: <TrendingUp className="text-rose-600 w-6 h-6 md:w-8 md:h-8"/>, color: 'rose' },
               ].map((s, i) => (
-                <div key={i} className="group bg-white p-8 rounded-[2.5rem] border border-slate-100 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200 hover:-translate-y-2">
-                  <div className={`w-12 h-12 rounded-2xl mb-6 flex items-center justify-center bg-${s.color}-50 group-hover:scale-110 transition`}>
+                <div key={i} className={`group bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200 hover:-translate-y-2 animate-fade-in-up delay-${(i+1)*100}`}>
+                  <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl mb-4 md:mb-6 flex items-center justify-center bg-${s.color}-50 group-hover:scale-110 transition-transform duration-500`}>
                     {s.icon}
                   </div>
-                  <div className="text-3xl font-black text-slate-900 mb-1">{s.value}</div>
-                  <div className="text-sm font-bold text-slate-800 mb-0.5">{s.label}</div>
-                  <div className="text-[10px] text-slate-400 uppercase font-black tracking-widest">{s.sub}</div>
+                  <div className="text-2xl md:text-3xl font-black text-slate-900 mb-1 leading-none">{s.value}</div>
+                  <div className="text-xs md:text-sm font-bold text-slate-800 mb-0.5">{s.label}</div>
+                  <div className="text-[9px] md:text-[10px] text-slate-400 uppercase font-black tracking-widest">{s.sub}</div>
                 </div>
               ))}
             </section>
@@ -244,10 +244,10 @@ export default function App() {
                 </div>
 
                 {/* Systems Section */}
-                <div className="lg:col-span-4">
-                   <div className="flex flex-col h-full rounded-[2.5rem] bg-slate-50 border border-slate-100 p-8 md:p-10">
+                <div className="lg:col-span-4 animate-fade-in-up delay-200">
+                   <div className="flex flex-col h-full rounded-[2.5rem] bg-slate-50 border border-slate-100 p-6 sm:p-8 md:p-10">
                      <span className="text-blue-600 text-xs font-black uppercase tracking-[0.3em] mb-4 block">Medical Hub</span>
-                     <h2 className="text-3xl font-black text-slate-900 mb-10 tracking-tight">ระบบสารสนเทศ</h2>
+                     <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-8 md:mb-10 tracking-tight">ระบบสารสนเทศ</h2>
                      
                      <div className="space-y-4">
                         {dbSystems.length > 0 ? dbSystems.map((app) => (
@@ -280,15 +280,15 @@ export default function App() {
             </section>
 
             {/* Training Courses Section */}
-            <section className="bg-slate-900 py-32">
-              <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                 <div className="flex flex-col md:flex-row justify-between items-end mb-20">
-                    <div className="max-w-2xl">
-                      <span className="text-blue-400 text-xs font-black uppercase tracking-[0.4em] mb-6 block">Professional Development</span>
-                      <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-[0.9]">ยกระดับทักษะ การกู้ชีพสากล</h2>
+            <section className="bg-slate-900 py-20 md:py-32">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 md:mb-20">
+                    <div className="max-w-2xl mb-8 md:mb-0 animate-fade-in-up">
+                      <span className="text-blue-400 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] md:tracking-[0.4em] mb-4 md:mb-6 block">Professional Development</span>
+                      <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1] md:leading-[0.9]">ยกระดับทักษะ<br className="hidden md:block"/>การกู้ชีพสากล</h2>
                     </div>
-                    <div className="hidden md:flex gap-4">
-                      <button onClick={() => setActiveTab('courses')} className="px-8 py-4 bg-white/5 hover:bg-white text-slate-400 hover:text-slate-900 border border-white/10 rounded-2xl text-xs font-black uppercase tracking-widest transition-all">Explore All</button>
+                    <div className="flex gap-4 animate-fade-in-up delay-100">
+                      <button onClick={() => setActiveTab('courses')} className="px-6 py-3 md:px-8 md:py-4 bg-white/5 hover:bg-white text-slate-300 hover:text-slate-900 border border-white/10 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all">Explore All</button>
                     </div>
                  </div>
 
@@ -315,12 +315,12 @@ export default function App() {
                               type="text" 
                               value={aiQuery} 
                               onChange={(e) => setAiQuery(e.target.value)} 
-                              placeholder="เช่น 'ผมอยากเป็นกู้ภัยเชี่ยวชาญด้านทางน้ํา'" 
-                              className="flex-grow px-8 py-5 rounded-2xl bg-black/20 border border-white/10 text-white placeholder:text-white/30 focus:ring-4 focus:ring-white/10 outline-none backdrop-blur-xl transition focus:bg-black/30 font-medium" 
+                              placeholder="เช่น 'ผมอยากเป็นกู้ภัยเฉพาะทาง'" 
+                              className="w-full px-6 py-4 md:px-8 md:py-5 rounded-xl md:rounded-2xl bg-black/20 border border-white/10 text-white placeholder:text-white/30 focus:ring-2 md:focus:ring-4 focus:ring-white/10 outline-none backdrop-blur-xl transition focus:bg-black/30 font-medium text-sm md:text-base" 
                               onKeyDown={(e) => e.key === 'Enter' && handleAiRecommendation()} 
                              />
-                             <button onClick={handleAiRecommendation} disabled={isAiLoading || !aiQuery.trim()} className="bg-white hover:bg-blue-50 text-slate-900 font-extrabold px-12 rounded-2xl transition shadow-2xl flex items-center justify-center h-[64px] min-w-[200px]">
-                               {isAiLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Start Analysis'}
+                             <button onClick={handleAiRecommendation} disabled={isAiLoading || !aiQuery.trim()} className="w-full md:w-auto bg-white hover:bg-blue-50 text-slate-900 font-extrabold px-8 md:px-12 rounded-xl md:rounded-2xl transition shadow-2xl flex items-center justify-center h-[56px] md:h-[64px] min-w-0 md:min-w-[200px] text-sm md:text-base">
+                               {isAiLoading ? <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin" /> : 'Start Analysis'}
                              </button>
                           </div>
 
@@ -335,9 +335,9 @@ export default function App() {
                  </div>
 
                  {/* Courses Grid */}
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {coursesList.map(course => (
-                      <div key={course.id} className="group relative bg-white/5 border border-white/5 rounded-[2.5rem] p-10 hover:bg-white/10 hover:border-white/10 transition-all duration-500 flex flex-col transform hover:-translate-y-2">
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                    {coursesList.map((course, i) => (
+                      <div key={course.id} className={`group relative bg-white/5 border border-white/5 rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-10 hover:bg-white/10 hover:border-white/10 transition-all duration-500 flex flex-col transform hover:-translate-y-2 animate-fade-in-up delay-${(i % 3 + 1) * 100}`}>
                         <div className="flex justify-between items-start mb-10">
                            <span className="px-4 py-1.5 rounded-xl bg-blue-500/10 text-blue-400 text-[10px] font-black uppercase tracking-widest border border-blue-500/10">{course.category}</span>
                            <div className={`w-3 h-3 rounded-full ${course.status === 'เปิดรับสมัคร' ? 'bg-green-400 shadow-[0_0_15px_rgba(74,222,128,0.5)]' : 'bg-rose-400'}`}></div>
@@ -359,27 +359,27 @@ export default function App() {
             </section>
 
             {/* Certification Check Section */}
-            <section className="max-w-4xl mx-auto px-6 lg:px-8 py-20 pb-40 text-center flex flex-col items-center">
-               <div className="w-24 h-24 rounded-3xl bg-blue-50 flex items-center justify-center mb-8 relative">
+            <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pb-40 text-center flex flex-col items-center">
+               <div className="w-20 h-20 md:w-24 md:h-24 rounded-[1.5rem] md:rounded-3xl bg-blue-50 flex items-center justify-center mb-6 md:mb-8 relative animate-fade-in-up">
                   <div className="absolute inset-0 bg-blue-100 rounded-3xl blur-2xl opacity-40 animate-pulse"></div>
-                  <Award className="w-12 h-12 text-blue-600 relative z-10" />
+                  <Award className="w-10 h-10 md:w-12 md:h-12 text-blue-600 relative z-10" />
                </div>
-               <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">ตรวจสอบวุฒิบัตร</h2>
-               <p className="text-slate-400 font-medium mb-12 text-center max-w-md uppercase tracking-widest text-[10px]">Portal for Official Verification</p>
+               <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-3 md:mb-4 tracking-tight animate-fade-in-up delay-100">ตรวจสอบวุฒิบัตร</h2>
+               <p className="text-slate-400 font-medium mb-10 md:mb-12 text-center max-w-md uppercase tracking-widest text-[9px] md:text-[10px] animate-fade-in-up delay-200">Portal for Official Verification</p>
                
-               <form onSubmit={handleSearchCert} className="w-full relative max-w-2xl group">
+               <form onSubmit={handleSearchCert} className="w-full relative max-w-2xl group animate-fade-in-up delay-300">
                  <div className="absolute inset-0 bg-blue-600/5 blur-[80px] rounded-full group-focus-within:opacity-100 transition duration-500"></div>
-                 <div className="relative bg-white p-2 rounded-[2.5rem] shadow-2xl border border-slate-100 flex items-center transition-all group-focus-within:scale-[1.02]">
-                    <div className="pl-8 pr-4 text-slate-400"><Search className="w-6 h-6"/></div>
+                 <div className="relative bg-white p-2 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-slate-100 flex flex-col sm:flex-row items-center transition-all group-focus-within:scale-[1.02] gap-2 sm:gap-0">
+                    <div className="hidden sm:block pl-6 md:pl-8 pr-2 md:pr-4 text-slate-400"><Search className="w-5 h-5 md:w-6 md:h-6"/></div>
                     <input 
                       type="text" 
                       value={searchCert} 
                       onChange={(e) => setSearchCert(e.target.value)} 
                       placeholder="CERTIFICATE ID (เช่น NIEM-2026-001)" 
-                      className="flex-grow py-6 rounded-3xl border-none focus:ring-0 outline-none font-bold text-slate-800 placeholder:text-slate-300" 
+                      className="w-full sm:flex-grow py-4 sm:py-5 md:py-6 px-6 sm:px-2 rounded-[1.5rem] md:rounded-3xl border-none focus:ring-0 outline-none font-bold text-slate-800 placeholder:text-slate-300 text-center sm:text-left text-sm md:text-base bg-slate-50 sm:bg-transparent" 
                       required 
                     />
-                    <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest px-10 h-16 rounded-[1.8rem] transition-all active:scale-95 shadow-xl shadow-blue-600/20">Verify</button>
+                    <button type="submit" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest px-8 md:px-10 py-4 sm:py-0 sm:h-14 md:h-16 rounded-[1.5rem] md:rounded-[1.8rem] transition-all active:scale-95 shadow-xl shadow-blue-600/20 text-xs md:text-sm">Verify</button>
                  </div>
                </form>
 
@@ -395,10 +395,10 @@ export default function App() {
                         <div className="absolute top-0 right-0 bg-emerald-500 text-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.3em] rounded-bl-3xl">Verified {searchResult.status}</div>
                         <Activity className="w-48 h-48 absolute -bottom-16 -right-16 text-blue-500/5 pointer-events-none" />
                         <div className="text-[10px] font-black text-blue-400 uppercase tracking-[0.4em] mb-12">Official Accreditation</div>
-                        <div className="space-y-10 relative z-10">
-                          <div className="flex flex-col"><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Authenticated Participant</span><span className="font-black text-white text-3xl tracking-tight">{searchResult.name}</span></div>
-                          <div className="flex flex-col"><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Awarded Degree/Course</span><span className="font-bold text-blue-200 text-xl leading-tight">{searchResult.course}</span></div>
-                          <div className="flex flex-col"><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Issued Date</span><span className="font-bold text-slate-300 text-lg">{searchResult.date}</span></div>
+                        <div className="space-y-6 md:space-y-10 relative z-10">
+                          <div className="flex flex-col"><span className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 md:mb-2">Authenticated Participant</span><span className="font-black text-white text-2xl md:text-3xl tracking-tight">{searchResult.name}</span></div>
+                          <div className="flex flex-col"><span className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 md:mb-2">Awarded Degree/Course</span><span className="font-bold text-blue-200 text-lg md:text-xl leading-tight">{searchResult.course}</span></div>
+                          <div className="flex flex-col"><span className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 md:mb-2">Issued Date</span><span className="font-bold text-slate-300 text-base md:text-lg">{searchResult.date}</span></div>
                         </div>
                       </div>
                     )}

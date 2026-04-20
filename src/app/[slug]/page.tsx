@@ -58,7 +58,7 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
     <div className="min-h-screen bg-[#fcfdfe] flex flex-col font-sans">
       <Navbar />
 
-      <main className="flex-grow pt-40 pb-32 px-6">
+      <main className="flex-grow pt-32 md:pt-40 pb-20 md:pb-32 px-4 sm:px-6 lg:px-8">
         <article className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-10 duration-1000">
           {/* Breadcrumb */}
           <div className="flex items-center gap-4 mb-12">
@@ -100,7 +100,7 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
           </div>
 
           {/* Content */}
-          <div className="bg-white rounded-[3rem] p-10 md:p-20 border border-slate-100 shadow-xl shadow-slate-200/50">
+          <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 sm:p-10 md:p-20 border border-slate-100 shadow-xl shadow-slate-200/50">
             <div 
               className="prose prose-slate prose-xl max-w-none text-slate-700 leading-[1.8] text-lg md:text-xl font-medium whitespace-pre-line"
               dangerouslySetInnerHTML={{ __html: page.content }}
@@ -108,15 +108,15 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
           </div>
 
           {/* Footer Action */}
-          <div className="mt-20 flex justify-between items-center bg-slate-900 p-8 md:p-12 rounded-[3.5rem] relative overflow-hidden">
+          <div className="mt-12 md:mt-20 flex flex-col md:flex-row justify-between items-center bg-slate-900 p-8 md:p-12 rounded-[2rem] md:rounded-[3.5rem] relative overflow-hidden gap-6 md:gap-0">
              <div className="absolute right-0 top-0 p-12 opacity-5 pointer-events-none">
-                <Award className="w-64 h-64 text-white" />
+                <Award className="w-48 h-48 md:w-64 md:h-64 text-white" />
              </div>
-             <div className="relative z-10">
+             <div className="relative z-10 text-center md:text-left">
                 <div className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-2 font-heading">Next Steps</div>
-                <div className="text-2xl font-black text-white">พร้อมก้าวสู่อนาคต EMS?</div>
+                <div className="text-xl md:text-2xl font-black text-white">พร้อมก้าวสู่อนาคต EMS?</div>
              </div>
-             <Link href="/" className="relative z-10 px-10 py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-700 transition transform hover:-translate-y-1 shadow-2xl shadow-blue-600/30">
+             <Link href="/" className="relative z-10 px-8 py-4 md:px-10 md:py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs hover:bg-blue-700 transition transform hover:-translate-y-1 shadow-2xl shadow-blue-600/30">
                Explpore Pathyways
              </Link>
           </div>
