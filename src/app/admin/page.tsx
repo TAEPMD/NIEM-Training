@@ -5,7 +5,8 @@ import {
   Plus, Search, Edit2, Trash2,
   Save, X, LayoutDashboard, BookOpen, Settings,
   LogOut, Activity, Globe, Eye, Loader2, AlertTriangle,
-  FileText, Sparkles, Link as LinkIcon, Menu, Lock, Key, Delete
+  FileText, Sparkles, Link as LinkIcon, Menu, Lock, Key, Delete,
+  ChevronDown, ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabase';
@@ -72,12 +73,27 @@ export default function AdminDashboard() {
     { name: 'ค้นหาใบประกาศฯ', href: '/', tab: 'cert' },
   ]);
 
+  const [siteConfig, setSiteConfig] = useState<any>({ 
+    name: 'NIEM Center', 
+    logo_url: '' 
+  });
+  const [contactInfo, setContactInfo] = useState<any>({ 
+    phone: '02-xxx-xxxx', 
+    email: 'contact@niem.go.th',
+    facebook: '',
+    address: '' 
+  });
+  const [footerConfig, setFooterConfig] = useState<any>({
+    about: 'สถาบันการแพทย์ฉุกเฉินแห่งชาติ (สพฉ.) เป็นหน่วยงานของรัฐที่มีหน้าที่คุ้มครองสิทธิในการเข้าถึงระบบการแพทย์ฉุกเฉินอย่างทั่วถึง เท่าเทียม และมีมาตรฐาน'
+  });
+
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPageModalOpen, setIsPageModalOpen] = useState(false);
   const [isBlogModalOpen, setIsBlogModalOpen] = useState(false);
   const [isSystemModalOpen, setIsSystemModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isPagesMenuOpen, setIsPagesMenuOpen] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   
   // Current Item state
@@ -163,6 +179,15 @@ export default function AdminDashboard() {
         
         const { data: nav } = await supabase.from('settings').select('*').eq('key', 'navigation').single();
         if (nav) setNavSettings(nav.value);
+
+        const { data: site } = await supabase.from('settings').select('*').eq('key', 'site_config').single();
+        if (site) setSiteConfig(site.value);
+
+        const { data: contact } = await supabase.from('settings').select('*').eq('key', 'contact_info').single();
+        if (contact) setContactInfo(contact.value);
+
+        const { data: footer } = await supabase.from('settings').select('*').eq('key', 'footer_config').single();
+        if (footer) setFooterConfig(footer.value);
       }
     } catch (err) {
       console.error(err);
@@ -421,8 +446,12 @@ export default function AdminDashboard() {
         ${isSidebarOpen ? 'fixed inset-0 w-full' : 'hidden lg:w-64'}`}>
         <div className="p-6 flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center">
-            <Activity className="w-8 h-8 mr-2 text-red-500" />
-            <span className="font-bold text-xl tracking-tight text-white uppercase italic">Niem Admin</span>
+            {siteConfig.logo_url ? (
+              <img src={siteConfig.logo_url} alt="Logo" className="w-8 h-8 mr-2 object-contain" />
+            ) : (
+              <Activity className="w-8 h-8 mr-2 text-red-500" />
+            )}
+            <span className="font-bold text-xl tracking-tight text-white uppercase italic">{siteConfig.name} Admin</span>
           </div>
           <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-slate-400 hover:text-white">
             <X className="w-6 h-6" />
@@ -437,45 +466,60 @@ export default function AdminDashboard() {
             <LayoutDashboard className="w-5 h-5 mr-3" /> แผงควบคุม (Dashboard)
           </button>
           
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-6 mb-2 px-2 italic">คอนเทนต์</div>
-          <button 
-            onClick={() => setActiveTab('blogs')}
-            className={`flex items-center w-full p-3 rounded-xl font-medium transition ${activeTab === 'blogs' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
-          >
-            <FileText className="w-5 h-5 mr-3" /> บทความ (Posts)
-          </button>
-          <button 
-            onClick={() => setActiveTab('pages')}
-            className={`flex items-center w-full p-3 rounded-xl font-medium transition ${activeTab === 'pages' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
-          >
-            <Globe className="w-5 h-5 mr-3" /> หน้าเว็บ (Pages)
-          </button>
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-6 mb-2 px-2 italic">การจัดการ</div>
           
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-6 mb-2 px-2 italic">ระบบและการเรียน</div>
           <button 
-            onClick={() => setActiveTab('courses')}
-            className={`flex items-center w-full p-3 rounded-xl font-medium transition ${activeTab === 'courses' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+            onClick={() => setIsPagesMenuOpen(!isPagesMenuOpen)}
+            className={`flex items-center justify-between w-full p-3 rounded-xl font-medium transition ${['pages', 'blogs', 'courses', 'systems'].includes(activeTab) ? 'text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
           >
-            <BookOpen className="w-5 h-5 mr-3" /> จัดการหลักสูตร
+            <div className="flex items-center">
+              <Globe className="w-5 h-5 mr-3" /> หน้าเว็บ (Page)
+            </div>
+            {isPagesMenuOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           </button>
-          <button 
-            onClick={() => setActiveTab('systems')}
-            className={`flex items-center w-full p-3 rounded-xl font-medium transition ${activeTab === 'systems' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
-          >
-            <Settings className="w-5 h-5 mr-3" /> ระบบสารสนเทศ
-          </button>
+
+          {isPagesMenuOpen && (
+            <div className="ml-4 space-y-1 mt-1 border-l border-slate-800 pl-4 animate-in slide-in-from-top-2 duration-300">
+              <button 
+                onClick={() => setActiveTab('pages')}
+                className={`flex items-center w-full p-2.5 rounded-lg text-sm font-medium transition ${activeTab === 'pages' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-500 hover:text-white'}`}
+              >
+                จัดการหน้าเว็บ (Static)
+              </button>
+              <button 
+                onClick={() => setActiveTab('blogs')}
+                className={`flex items-center w-full p-2.5 rounded-lg text-sm font-medium transition ${activeTab === 'blogs' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-500 hover:text-white'}`}
+              >
+                บทความ (Posts)
+              </button>
+              <button 
+                onClick={() => setActiveTab('courses')}
+                className={`flex items-center w-full p-2.5 rounded-lg text-sm font-medium transition ${activeTab === 'courses' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-500 hover:text-white'}`}
+              >
+                จัดการหลักสูตร
+              </button>
+              <button 
+                onClick={() => setActiveTab('systems')}
+                className={`flex items-center w-full p-2.5 rounded-lg text-sm font-medium transition ${activeTab === 'systems' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-500 hover:text-white'}`}
+              >
+                ระบบสารสนเทศ
+              </button>
+            </div>
+          )}
+          
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-6 mb-2 px-2 italic">ทรัพยากร</div>
           <button 
             onClick={() => setActiveTab('media')}
             className={`flex items-center w-full p-3 rounded-xl font-medium transition ${activeTab === 'media' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
           >
-            <Globe className="w-5 h-5 mr-3" /> คลังสื่อ (Media)
+            <Sparkles className="w-5 h-5 mr-3 text-indigo-400" /> คลังสื่อ (Media)
           </button>
-            <button 
-              onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }}
-              className={`flex items-center w-full p-3 rounded-xl font-medium transition ${activeTab === 'settings' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
-            >
-              <Settings className="w-5 h-5 mr-3" /> ตั้งค่าทั่วไป (Settings)
-            </button>
+          <button 
+            onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }}
+            className={`flex items-center w-full p-3 rounded-xl font-medium transition ${activeTab === 'settings' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+          >
+            <Settings className="w-5 h-5 mr-3" /> ตั้งค่าทั่วไป (Settings)
+          </button>
         </nav>
 
         <div className="p-4 border-t border-slate-800 pb-8">
@@ -747,53 +791,103 @@ export default function AdminDashboard() {
             </div>
           </div>
         ) : activeTab === 'settings' ? (
-          <div className="bg-white rounded-[2.5rem] border border-slate-100 p-10 max-w-2xl animate-in fade-in duration-500">
-            <h2 className="text-2xl font-black text-slate-800 mb-8 flex items-center tracking-tight">
-              <Sparkles className="w-6 h-6 mr-3 text-blue-600" /> ปรับแต่งหน้าแรก (Hero Banner)
-            </h2>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase text-slate-400 tracking-widest">หัวข้อหลัก (Title)</label>
-                <input type="text" value={heroSettings.title} onChange={(e) => setHeroSettings({...heroSettings, title: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
+          <div className="space-y-12 animate-in fade-in duration-500 pb-20">
+            {/* 1. Brand & Identity */}
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 p-10 shadow-sm">
+              <h2 className="text-2xl font-black text-slate-800 mb-8 flex items-center tracking-tight">
+                <Globe className="w-6 h-6 mr-3 text-blue-600" /> ข้อมูลทั่วไป (Brand & Identity)
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-slate-400 tracking-widest">ชื่อเว็บไซต์ (Site Name)</label>
+                  <input type="text" value={siteConfig.name} onChange={(e) => setSiteConfig({...siteConfig, name: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-slate-400 tracking-widest">URL โลโก้ (Logo URL)</label>
+                  <input type="text" value={siteConfig.logo_url} onChange={(e) => setSiteConfig({...siteConfig, logo_url: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none" placeholder="https://..." />
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase text-slate-400 tracking-widest">คำบรรยาย (Subtitle)</label>
-                <textarea rows={3} value={heroSettings.subtitle} onChange={(e) => setHeroSettings({...heroSettings, subtitle: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none text-sm leading-relaxed" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase text-slate-400 tracking-widest">ข้อความปุ่มที่ 1 (Primary Button)</label>
-                <input type="text" value={heroSettings.button_text} onChange={(e) => setHeroSettings({...heroSettings, button_text: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase text-slate-400 tracking-widest">ข้อความปุ่มที่ 2 (Secondary Button)</label>
-                <input type="text" value={heroSettings.button2_text || ''} onChange={(e) => setHeroSettings({...heroSettings, button2_text: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
+              <button 
+                onClick={async () => {
+                  const { error } = await supabase.from('settings').upsert({ key: 'site_config', value: siteConfig });
+                  if (error) alert(error.message);
+                  else alert('บันทึกข้อมูลทั่วไปแล้ว');
+                }}
+                className="mt-8 px-8 py-4 bg-blue-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-200 transition"
+              >
+                Save Identity
+              </button>
+            </div>
+
+            {/* 2. Hero Banner */}
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 p-10 shadow-sm">
+              <h2 className="text-2xl font-black text-slate-800 mb-8 flex items-center tracking-tight">
+                <Sparkles className="w-6 h-6 mr-3 text-blue-600" /> ปรับแต่งหน้าแรก (Hero Banner)
+              </h2>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-slate-400 tracking-widest">หัวข้อหลัก (Title)</label>
+                  <input type="text" value={heroSettings.title} onChange={(e) => setHeroSettings({...heroSettings, title: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-slate-400 tracking-widest">คำบรรยาย (Subtitle)</label>
+                  <textarea rows={3} value={heroSettings.subtitle} onChange={(e) => setHeroSettings({...heroSettings, subtitle: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none text-sm leading-relaxed" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase text-slate-400 tracking-widest">ข้อความปุ่มที่ 1</label>
+                    <input type="text" value={heroSettings.button_text} onChange={(e) => setHeroSettings({...heroSettings, button_text: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase text-slate-400 tracking-widest">ข้อความปุ่มที่ 2</label>
+                    <input type="text" value={heroSettings.button2_text || ''} onChange={(e) => setHeroSettings({...heroSettings, button2_text: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
+                  </div>
+                </div>
               </div>
               <button 
                 onClick={async () => {
                   const { error } = await supabase.from('settings').upsert({ key: 'hero', value: heroSettings });
                   if (error) alert(error.message);
-                  else alert('บันทึกการตั้งค่า Hero แล้ว');
+                  else alert('บันทึกการตั้งค่า Hero Banner แล้ว');
                 }}
-                className="w-full py-5 bg-blue-600 text-white font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-200 transition mt-4"
+                className="mt-8 px-8 py-4 bg-blue-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-200 transition"
               >
                 Save Hero Settings
               </button>
             </div>
 
-            <div className="mt-16 space-y-8">
-              <h2 className="text-2xl font-black text-slate-800 flex items-center tracking-tight">
-                <LayoutDashboard className="w-6 h-6 mr-3 text-blue-600" /> จัดการเมนูนำทาง (Navigation)
+            {/* 3. Navigation */}
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 p-10 shadow-sm">
+              <h2 className="text-2xl font-black text-slate-800 flex items-center tracking-tight mb-8">
+                <LayoutDashboard className="w-6 h-6 mr-3 text-blue-600" /> เมนูนำทาง (Navigation)
               </h2>
               <div className="space-y-4">
                 {navSettings.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl group">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 flex items-center justify-center bg-white rounded-lg text-slate-400 font-bold mr-4 shadow-sm border border-slate-100">
-                        {index + 1}
-                      </div>
-                      <span className="font-bold text-slate-700">{item.name}</span>
+                  <div key={index} className="flex flex-col md:flex-row md:items-center gap-4 p-5 bg-slate-50 border border-slate-100 rounded-2xl group">
+                    <div className="w-8 h-8 flex items-center justify-center bg-white rounded-lg text-slate-400 font-bold shadow-sm border border-slate-100">
+                      {index + 1}
                     </div>
+                    <input type="text" value={item.name} onChange={(e) => {
+                      const newNav = [...navSettings];
+                      newNav[index].name = e.target.value;
+                      setNavSettings(newNav);
+                    }} className="flex-grow max-w-xs px-4 py-2 rounded-xl bg-white border border-slate-200 outline-none text-sm font-bold" placeholder="ชื่อเมนู" />
+                    <input type="text" value={item.href} onChange={(e) => {
+                      const newNav = [...navSettings];
+                      newNav[index].href = e.target.value;
+                      setNavSettings(newNav);
+                    }} className="flex-grow px-4 py-2 rounded-xl bg-white border border-slate-200 outline-none text-sm" placeholder="Link (/blog)" />
+                    
                     <div className="flex gap-2">
+                      <button 
+                         onClick={() => {
+                          const newNav = navSettings.filter((_, i) => i !== index);
+                          setNavSettings(newNav);
+                         }}
+                         className="p-2 text-red-400 hover:text-red-600 transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                       <button 
                         disabled={index === 0}
                         onClick={() => {
@@ -801,7 +895,7 @@ export default function AdminDashboard() {
                           [newNav[index-1], newNav[index]] = [newNav[index], newNav[index-1]];
                           setNavSettings(newNav);
                         }}
-                        className="p-2 bg-white rounded-xl text-slate-400 hover:text-blue-600 disabled:opacity-20 transition"
+                        className="p-2 bg-white rounded-xl text-slate-400 hover:text-blue-600 disabled:opacity-20 transition shadow-sm"
                       >
                         <Plus className="w-4 h-4 transform rotate-[-90deg]" />
                       </button>
@@ -812,23 +906,87 @@ export default function AdminDashboard() {
                            [newNav[index+1], newNav[index]] = [newNav[index], newNav[index+1]];
                            setNavSettings(newNav);
                          }}
-                        className="p-2 bg-white rounded-xl text-slate-400 hover:text-blue-600 disabled:opacity-20 transition"
+                        className="p-2 bg-white rounded-xl text-slate-400 hover:text-blue-600 disabled:opacity-20 transition shadow-sm"
                       >
                         <Plus className="w-4 h-4 transform rotate-90deg]" />
                       </button>
                     </div>
                   </div>
                 ))}
+                <button 
+                  onClick={() => setNavSettings([...navSettings, { name: 'เมนูใหม่', href: '/', tab: '' }])}
+                  className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-bold hover:border-blue-400 hover:text-blue-400 transition flex items-center justify-center"
+                >
+                  <Plus className="w-5 h-5 mr-2" /> เพิ่มปุ่มเมนู
+                </button>
               </div>
               <button 
                 onClick={async () => {
                   const { error } = await supabase.from('settings').upsert({ key: 'navigation', value: navSettings });
                   if (error) alert(error.message);
-                  else alert('บันทึกลำดับเมนูแล้ว');
+                  else alert('บันทึกเมนูนำทางแล้ว');
                 }}
-                className="w-full py-5 bg-slate-900 text-white font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-slate-800 shadow-xl shadow-slate-200 transition mt-4"
+                className="mt-8 px-8 py-4 bg-slate-900 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-slate-800 shadow-xl shadow-slate-200 transition"
               >
-                Save Navigation Order
+                Save Navigation
+              </button>
+            </div>
+
+            {/* 4. Contact Info */}
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 p-10 shadow-sm">
+              <h2 className="text-2xl font-black text-slate-800 mb-8 flex items-center tracking-tight">
+                <LinkIcon className="w-6 h-6 mr-3 text-blue-600" /> ข้อมูลติดต่อ (Contact Info)
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-slate-400 tracking-widest">เบอร์โทรศัพท์</label>
+                  <input type="text" value={contactInfo.phone} onChange={(e) => setContactInfo({...contactInfo, phone: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-slate-400 tracking-widest">อีเมล</label>
+                  <input type="email" value={contactInfo.email} onChange={(e) => setContactInfo({...contactInfo, email: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none font-bold" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-slate-400 tracking-widest">Facebook (URL)</label>
+                  <input type="text" value={contactInfo.facebook} onChange={(e) => setContactInfo({...contactInfo, facebook: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-slate-400 tracking-widest">ที่อยู่</label>
+                  <textarea rows={2} value={contactInfo.address} onChange={(e) => setContactInfo({...contactInfo, address: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                </div>
+              </div>
+              <button 
+                onClick={async () => {
+                  const { error } = await supabase.from('settings').upsert({ key: 'contact_info', value: contactInfo });
+                  if (error) alert(error.message);
+                  else alert('บันทึกข้อมูลติดต่อแล้ว');
+                }}
+                className="mt-8 px-8 py-4 bg-blue-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-200 transition"
+              >
+                Save Contact
+              </button>
+            </div>
+
+            {/* 5. Footer Settings */}
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 p-10 shadow-sm">
+              <h2 className="text-2xl font-black text-slate-800 mb-8 flex items-center tracking-tight">
+                <FileText className="w-6 h-6 mr-3 text-blue-600" /> ส่วนท้ายเว็บไซต์ (Footer Customization)
+              </h2>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase text-slate-400 tracking-widest">ข้อความเกี่ยวกับเรา (About Text)</label>
+                  <textarea rows={4} value={footerConfig.about} onChange={(e) => setFooterConfig({...footerConfig, about: e.target.value})} className="w-full px-5 py-4 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 outline-none text-sm leading-relaxed" />
+                </div>
+              </div>
+              <button 
+                onClick={async () => {
+                  const { error } = await supabase.from('settings').upsert({ key: 'footer_config', value: footerConfig });
+                  if (error) alert(error.message);
+                  else alert('บันทึกการตั้งค่า Footer แล้ว');
+                }}
+                className="mt-8 px-8 py-4 bg-blue-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-200 transition"
+              >
+                Save Footer Settings
               </button>
             </div>
           </div>

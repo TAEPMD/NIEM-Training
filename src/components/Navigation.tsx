@@ -20,6 +20,7 @@ export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string
     { name: 'ค้นหาใบประกาศฯ', href: '/', tab: 'cert' },
   ]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [siteConfig, setSiteConfig] = useState<any>({ name: 'Niem Center', logo_url: '' });
 
   useEffect(() => {
     const fetchNavData = async () => {
@@ -34,6 +35,10 @@ export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string
       // Fetch Nav Order
       const { data: nav } = await supabase.from('settings').select('*').eq('key', 'navigation').single();
       if (nav && nav.value) setNavLinks(nav.value);
+
+      // Fetch Site Config
+      const { data: site } = await supabase.from('settings').select('*').eq('key', 'site_config').single();
+      if (site && site.value) setSiteConfig(site.value);
     };
     fetchNavData();
   }, []);
@@ -43,10 +48,14 @@ export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
           <Link href="/" className="flex items-center cursor-pointer group">
-            <Activity className="w-9 h-9 mr-3 text-red-500 transform group-hover:rotate-12 transition-transform" />
+            {siteConfig.logo_url ? (
+              <img src={siteConfig.logo_url} alt={siteConfig.name} className="h-10 w-auto mr-3" />
+            ) : (
+              <Activity className="w-9 h-9 mr-3 text-red-500 transform group-hover:rotate-12 transition-transform" />
+            )}
             <div className="flex flex-col">
-              <span className="font-black text-2xl tracking-tighter uppercase leading-none">Niem</span>
-              <span className="font-bold text-blue-400 text-[10px] tracking-[0.3em] uppercase leading-none mt-1">Center</span>
+              <span className="font-black text-2xl tracking-tighter uppercase leading-none">{siteConfig.name.split(' ')[0]}</span>
+              <span className="font-bold text-blue-400 text-[10px] tracking-[0.3em] uppercase leading-none mt-1">{siteConfig.name.split(' ').slice(1).join(' ') || 'Center'}</span>
             </div>
           </Link>
 
