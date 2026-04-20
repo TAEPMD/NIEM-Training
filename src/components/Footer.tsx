@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/utils/supabase';
-import { Activity, Mail, Phone, MapPin, Facebook, Globe, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { Activity, Mail, Phone, MapPin, Link as LinkIcon, Globe, ArrowUpRight, ShieldCheck } from 'lucide-react';
 
 export default function Footer() {
   const [contactInfo, setContactInfo] = useState<any>({ 
@@ -59,7 +59,7 @@ export default function Footer() {
             </p>
             <div className="flex gap-3">
               {[
-                { icon: <Facebook className="w-5 h-5"/>, href: contactInfo.facebook },
+                { icon: <LinkIcon className="w-5 h-5"/>, href: contactInfo.facebook },
                 { icon: <Globe className="w-5 h-5"/>, href: '#' },
                 { icon: <Mail className="w-5 h-5"/>, href: `mailto:${contactInfo.email}` }
               ].map((s, i) => (
