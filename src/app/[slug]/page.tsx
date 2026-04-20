@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import Navbar from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import { FileText, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { FileText, ArrowLeft, Loader2, Calendar, User, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabase } from '@/utils/supabase';
@@ -41,10 +41,12 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
   }, [slug]);
 
   if (loading) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 overflow-hidden relative">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 overflow-hidden relative">
       <div className="absolute inset-0 bg-blue-600/5 backdrop-blur-3xl animate-pulse"></div>
-      <Loader2 className="w-16 h-16 text-blue-500 animate-spin relative z-10" />
-      <div className="text-blue-200/50 mt-4 font-black uppercase tracking-[0.5em] text-xs relative z-10">Authenticating Content</div>
+      <div className="w-24 h-24 rounded-3xl bg-blue-600/10 border border-white/10 flex items-center justify-center relative animate-float">
+         <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+      </div>
+      <div className="text-white/30 mt-8 font-black uppercase tracking-[0.5em] text-[10px] animate-pulse">Retrieving Medical Record</div>
     </div>
   );
 
@@ -53,43 +55,70 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#fcfdfe] flex flex-col font-sans">
       <Navbar />
 
-      <main className="flex-grow py-16 px-4">
-        <article className="max-w-5xl mx-auto bg-white rounded-[3rem] shadow-2xl shadow-blue-900/5 overflow-hidden border border-slate-100 animate-in slide-in-from-bottom-8 duration-700">
-          {/* Header */}
-          <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-12 md:p-20 text-white relative">
-            <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
-              <FileText className="w-64 h-64" />
-            </div>
-            <Link href="/" className="inline-flex items-center text-blue-300 hover:text-white transition-all mb-10 text-xs font-black uppercase tracking-widest bg-white/5 px-4 py-2 rounded-xl border border-white/10 hover:bg-white/10">
-              <ArrowLeft className="w-4 h-4 mr-2" /> Back to portal
+      <main className="flex-grow pt-40 pb-32 px-6">
+        <article className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-10 duration-1000">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-4 mb-12">
+            <Link href="/" className="group flex items-center text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition">
+              <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center mr-3 group-hover:bg-blue-600 group-hover:text-white transition">
+                <ArrowLeft className="w-4 h-4" />
+              </div>
+              Back to portal
             </Link>
-            <h1 className="text-4xl md:text-7xl font-black tracking-tight mb-8 leading-tight">
+            <div className="h-4 w-[1px] bg-slate-200"></div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">Dynamic Content</span>
+          </div>
+
+          {/* Header */}
+          <header className="mb-16">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1] mb-12">
               {page.title}
             </h1>
-            <div className="flex items-center text-blue-300/60 text-xs font-black uppercase tracking-[0.2em] bg-black/20 w-fit px-4 py-2 rounded-full backdrop-blur-md">
-              <FileText className="w-3 h-3 mr-2" /> Last Updated {new Date(page.updated_at).toLocaleDateString()}
+            <div className="flex flex-wrap items-center gap-6 text-[10px] font-black uppercase tracking-widest text-slate-400">
+               <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl">
+                 <Calendar className="w-4 h-4 text-blue-600" /> Issued {new Date(page.updated_at).toLocaleDateString()}
+               </div>
+               <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl">
+                 <FileText className="w-4 h-4 text-emerald-600" /> Official Document
+               </div>
+               <button className="flex items-center gap-2 bg-slate-100 hover:bg-blue-600 hover:text-white transition px-4 py-2 rounded-xl">
+                 <Share2 className="w-4 h-4" /> Share
+               </button>
             </div>
+          </header>
+
+          {/* Featured Image Placeholder (EMS Theme) */}
+          <div className="aspect-[21/9] rounded-[3rem] bg-slate-900 mb-20 relative overflow-hidden group shadow-2xl">
+             <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-transparent to-indigo-900/40 mix-blend-overlay"></div>
+             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/micro-carbon.png')] opacity-20"></div>
+             <div className="absolute inset-0 flex items-center justify-center">
+                <Activity className="w-32 h-32 text-blue-600/10 group-hover:scale-125 transition duration-1000" />
+             </div>
           </div>
 
           {/* Content */}
-          <div className="p-12 md:p-20">
+          <div className="bg-white rounded-[3rem] p-10 md:p-20 border border-slate-100 shadow-xl shadow-slate-200/50">
             <div 
-              className="text-slate-700 leading-[1.8] text-lg lg:text-xl whitespace-pre-line font-medium"
+              className="prose prose-slate prose-xl max-w-none text-slate-700 leading-[1.8] text-lg md:text-xl font-medium whitespace-pre-line"
               dangerouslySetInnerHTML={{ __html: page.content }}
             />
           </div>
 
-          {/* Footer Info */}
-          <div className="p-12 md:p-20 bg-slate-50/50 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="text-slate-400 text-xs font-bold uppercase tracking-widest">
-              NIEM Official Document • 2026 Registry
-            </div>
-            <Link href="/" className="px-10 py-5 bg-blue-600 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] hover:bg-blue-700 shadow-2xl shadow-blue-500/20 transition transform hover:scale-105 active:scale-95 text-xs">
-              Return Home
-            </Link>
+          {/* Footer Action */}
+          <div className="mt-20 flex justify-between items-center bg-slate-900 p-8 md:p-12 rounded-[3.5rem] relative overflow-hidden">
+             <div className="absolute right-0 top-0 p-12 opacity-5 pointer-events-none">
+                <Award className="w-64 h-64 text-white" />
+             </div>
+             <div className="relative z-10">
+                <div className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-2 font-heading">Next Steps</div>
+                <div className="text-2xl font-black text-white">พร้อมก้าวสู่อนาคต EMS?</div>
+             </div>
+             <Link href="/" className="relative z-10 px-10 py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-700 transition transform hover:-translate-y-1 shadow-2xl shadow-blue-600/30">
+               Explpore Pathyways
+             </Link>
           </div>
         </article>
       </main>
