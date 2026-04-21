@@ -113,6 +113,8 @@ h1, h2, h3, h4, h5, h6 {
 .card-tilt {
   transition: transform 0.1s ease-out;
   transform-style: preserve-3d;
+  width: 100%;
+  min-width: 0;
 }
 
 .card-tilt-shine {

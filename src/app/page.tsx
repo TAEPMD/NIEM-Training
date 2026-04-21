@@ -47,7 +47,9 @@ function TiltCard({ children, className = '' }: { children: React.ReactNode; cla
       style={{ 
         transform: transform,
         transformStyle: 'preserve-3d',
-        transition: 'transform 0.15s ease-out'
+        transition: 'transform 0.15s ease-out',
+        width: '100%',
+        minWidth: 0
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
