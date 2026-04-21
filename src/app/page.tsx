@@ -105,12 +105,13 @@ export default function App() {
 
   const [coursesList, setCoursesList] = useState<CourseItem[]>([]);
   const [dbNews, setDbNews] = useState<any[]>([]);
+  const [heroData, setHeroData] = useState<any>(null);
   
-  const [heroData, setHeroData] = useState<any>({ 
-    title: 'ศูนย์ฝึกอบรม', 
-    subtitle: 'ยกระดับมาตรฐานการแพทย์ฉุกเฉินนอกโรงพยาบาล สู่ความเป็นเลิศทางวิชาการและทักษะการกู้ชีพสากล', 
-    button_text: 'ดูเพิ่มเติม',
-    button2_text: 'ระบบตรวจสอบ'
+  // Stats from database
+  const [stats, setStats] = useState({
+    staffCount: 0,
+    courseCount: 0,
+    staffGrowth: 0
   });
 
   // Loading States
@@ -133,6 +134,19 @@ export default function App() {
 
         const { data: hero } = await supabase.from('settings').select('*').eq('key', 'hero').single();
         if (hero && hero.value) setHeroData(hero.value);
+        
+        // Fetch stats - try to get real data, fallback to 0 if not available
+        const { count: courseCount } = await supabase.from('courses').select('*', { count: 'exact', head: true });
+        const { data: settings } = await supabase.from('settings').select('*').in('key', ['staff_count', 'staff_growth']);
+        
+        const staffSetting = settings?.find(s => s.key === 'staff_count');
+        const growthSetting = settings?.find(s => s.key === 'staff_growth');
+        
+        setStats({
+          staffCount: staffSetting?.value || 0,
+          courseCount: courseCount || 0,
+          staffGrowth: growthSetting?.value || 0
+        });
         
         showToast('ยินดีต้อนรับสู่ NIEM Training', 'info');
       } catch (error) {
@@ -195,72 +209,53 @@ export default function App() {
         {activeTab === 'home' && (
           <div className="">
             
-            {/* Hero Section - New Design with Gradient & Parallax */}
+            {/* Compact Hero Section */}
             <section 
               ref={heroReveal.ref}
-              className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden"
+              className="relative min-h-[300px] sm:min-h-[350px] md:min-h-[400px] flex flex-col items-center justify-center text-center px-4 py-16 overflow-hidden"
               style={{
                 background: 'var(--gradient-hero)'
               }}
             >
-              {/* Animated Background Elements */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--accent)]/20 rounded-full blur-[100px] animate-pulse" />
-                <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-500/20 rounded-full blur-[80px] animate-pulse delay-1000" />
-                <div className="absolute top-1/2 right-1/3 w-48 h-48 bg-purple-500/10 rounded-full blur-[60px] animate-float" />
+              {/* Subtle Background Elements */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-50">
+                <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[var(--accent)]/10 rounded-full blur-[80px]" />
+                <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-blue-500/10 rounded-full blur-[60px]" />
               </div>
 
               {/* Hero Content */}
-              <div className={`relative z-10 max-w-5xl mx-auto transition-all duration-1000 ${heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <div className={`relative z-10 max-w-4xl mx-auto transition-all duration-1000 ${heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-6 animate-fade-in-up">
-                  <Sparkles className="w-4 h-4 text-[var(--accent)]" />
-                  <span className="text-sm font-medium text-white/90">พร้อมด้วย AI วิเคราะห์เส้นทางอาชีพ</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-4">
+                  <Sparkles className="w-3 h-3 text-[var(--accent)]" />
+                  <span className="text-xs font-medium text-white/90">AI วิเคราะห์เส้นทางอาชีพ</span>
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 text-white">
-                  <span className="block">ก้าวสู่ความเป็น</span>
-                  <span className="gradient-text">เลิศทางการแพทย์</span>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 text-white">
+                  <span className="block">{heroData?.title || 'ศูนย์ฝึกอบรม'}</span>
+                  <span className="gradient-text">{heroData?.subtitle?.split(' ')[0] || 'ก้าวสู่ความเป็นเลิศ'}</span>
                 </h1>
                 
-                <p className="text-lg md:text-xl lg:text-2xl font-medium text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed px-4">
-                  {heroData.subtitle}
+                <p className="text-sm md:text-base lg:text-lg font-medium text-white/70 max-w-xl mx-auto mb-6 leading-relaxed px-4">
+                  {heroData?.subtitle || 'ยกระดับมาตรฐานการแพทย์ฉุกเฉิน'}
                 </p>
 
                 {/* CTA Buttons */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 stagger-children">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                   <button 
                     onClick={() => setActiveTab('courses')} 
-                    className="group btn-gradient text-white px-8 py-4 rounded-full font-semibold text-base md:text-lg flex items-center gap-2 animate-glow-pulse"
+                    className="group btn-gradient text-white px-6 py-2.5 rounded-full font-semibold text-sm flex items-center gap-2"
                   >
-                    {heroData.button_text}
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    {heroData?.button_text || 'ดูเพิ่มเติม'}
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
                   <button 
                     onClick={() => setActiveTab('cert')} 
-                    className="group px-8 py-4 rounded-full font-semibold text-base md:text-lg text-white border border-white/30 hover:bg-white/10 transition-all flex items-center gap-2"
+                    className="group px-6 py-2.5 rounded-full font-semibold text-sm text-white border border-white/30 hover:bg-white/10 transition-all flex items-center gap-2"
                   >
-                    <Shield className="w-5 h-5" />
-                    {heroData.button2_text}
+                    <Shield className="w-4 h-4" />
+                    {heroData?.button2_text || 'ระบบตรวจสอบ'}
                   </button>
-                </div>
-              </div>
-
-              {/* Floating Icons */}
-              <div className="absolute bottom-20 left-10 hidden lg:block animate-float">
-                <HeartPulse className="w-12 h-12 text-[var(--accent)]/40" />
-              </div>
-              <div className="absolute top-1/3 right-10 hidden lg:block animate-float delay-500">
-                <Stethoscope className="w-10 h-10 text-blue-400/40" />
-              </div>
-              <div className="absolute bottom-1/3 left-20 hidden lg:block animate-float delay-1000">
-                <Ambulance className="w-10 h-10 text-purple-400/30" />
-              </div>
-
-              {/* Scroll Indicator */}
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce-subtle">
-                <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-2">
-                  <div className="w-1 h-2 bg-white/60 rounded-full" />
                 </div>
               </div>
             </section>
@@ -273,7 +268,8 @@ export default function App() {
               <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 transition-all duration-700 ${featuresReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                 
                 {/* AI Assistant Card - With 3D Tilt */}
-                <TiltCard className="group">
+                <div id="ai-pathway" className="scroll-mt-20">
+                  <TiltCard className="group">
                   <div className="apple-card gradient-card-1 p-8 sm:p-10 md:p-14 text-center flex flex-col items-center justify-center min-h-[400px] md:min-h-[500px] w-full relative overflow-hidden hover-lift">
                     {/* Icon */}
                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--accent)] to-blue-500 flex items-center justify-center mb-6 shadow-lg shadow-[var(--accent)]/20 group-hover:scale-110 transition-transform duration-300">
@@ -294,7 +290,7 @@ export default function App() {
                             type="text" 
                             value={aiQuery} 
                             onChange={(e) => setAiQuery(e.target.value)} 
-                            placeholder="เช่น: ต้องการเป็น Paramedic..." 
+                            placeholder="บอกเป้าหมายอาชีพของคุณ..." 
                             className="w-full px-5 md:px-6 py-3.5 md:py-4 rounded-full bg-[var(--bg-primary)] border-2 border-transparent focus:border-[var(--accent)] text-[var(--text-primary)] placeholder-[var(--text-secondary)] outline-none transition text-center text-sm md:text-base shadow-inner" 
                             onKeyDown={(e) => e.key === 'Enter' && handleAiRecommendation()} 
                           />
@@ -322,9 +318,11 @@ export default function App() {
                     {aiError && !isLoading && <div className="mt-3 md:mt-4 text-rose-500 text-xs md:text-sm font-medium">{aiError}</div>}
                   </div>
                 </TiltCard>
+                </div>
 
                 {/* Verification Card - With 3D Tilt */}
-                <TiltCard className="group">
+                <div id="verification" className="scroll-mt-20">
+                  <TiltCard className="group">
                   <div className="apple-card p-8 sm:p-10 md:p-14 text-center flex flex-col items-center justify-center min-h-[400px] md:min-h-[500px] w-full relative overflow-hidden hover-lift" style={{ background: 'var(--gradient-dark-card)' }}>
                     {/* Background Pattern */}
                     <div className="absolute inset-0 opacity-5">
@@ -354,7 +352,7 @@ export default function App() {
                             type="text" 
                             value={searchCert} 
                             onChange={(e) => setSearchCert(e.target.value)} 
-                            placeholder="CERTIFICATE ID (ลอง: NIEM-2026-001)" 
+                            placeholder="CERTIFICATE ID" 
                             className="w-full pl-12 pr-5 py-3.5 md:py-4 rounded-full bg-white/10 text-white placeholder-white/40 focus:bg-white/20 outline-none transition text-sm font-medium border border-white/10 focus:border-[var(--accent)]/50 backdrop-blur-sm" 
                           />
                         </div>
@@ -393,6 +391,7 @@ export default function App() {
                     </div>
                   </div>
                 </TiltCard>
+                </div>
 
               </div>
             </section>
@@ -405,6 +404,7 @@ export default function App() {
               <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-700 delay-200 ${statsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                 
                 {/* News card */}
+                <div id="news" className="scroll-mt-20">
                 {isLoading ? (
                   <NewsSkeleton />
                 ) : (
@@ -422,42 +422,47 @@ export default function App() {
                     </TiltCard>
                   ))
                 )}
+                </div>
 
-                {/* Stat block 1 */}
+                {/* Stat block 1 - Staff count */}
+                <div id="stats" className="scroll-mt-20">
                 {isLoading ? (
                   <StatsSkeleton />
-                ) : (
+                ) : stats.staffCount > 0 ? (
                   <TiltCard className="group">
                     <div className="apple-card gradient-card-3 p-8 md:p-10 flex flex-col justify-center items-center text-center min-h-[350px] md:min-h-[400px] hover-lift hover-glow">
                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/20">
                          <Users className="w-7 h-7 text-white" />
                        </div>
-                       <div className="text-5xl sm:text-6xl font-bold tracking-tight gradient-text">4.5K</div>
+                       <div className="text-5xl sm:text-6xl font-bold tracking-tight gradient-text">{stats.staffCount.toLocaleString()}</div>
                        <div className="text-[var(--text-secondary)] font-medium mt-2 text-sm md:text-base">เจ้าหน้าที่ทีมรุก</div>
-                       <div className="mt-4 flex items-center gap-1 text-xs text-emerald-500 font-medium">
-                         <TrendingUp className="w-3 h-3" /> +12% จากปีที่แล้ว
-                       </div>
+                       {stats.staffGrowth > 0 && (
+                         <div className="mt-4 flex items-center gap-1 text-xs text-emerald-500 font-medium">
+                           <TrendingUp className="w-3 h-3" /> +{stats.staffGrowth}% จากปีที่แล้ว
+                         </div>
+                       )}
                     </div>
                   </TiltCard>
-                )}
+                ) : null}
+                </div>
 
-                {/* Stat block 2 */}
+                {/* Stat block 2 - Course count */}
                 {isLoading ? (
                   <StatsSkeleton />
-                ) : (
+                ) : stats.courseCount > 0 ? (
                   <TiltCard className="group">
                     <div className="apple-card p-8 md:p-10 flex flex-col justify-center items-center text-center min-h-[350px] md:min-h-[400px] hover-lift border border-[var(--apple-border)]" style={{ background: 'var(--gradient-card-1)' }}>
                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--accent)] to-teal-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-[var(--accent)]/20">
                          <GraduationCap className="w-7 h-7 text-white" />
                        </div>
-                       <div className="text-5xl sm:text-6xl font-bold tracking-tight text-[var(--text-primary)]">86</div>
+                       <div className="text-5xl sm:text-6xl font-bold tracking-tight text-[var(--text-primary)]">{stats.courseCount}</div>
                        <div className="text-[var(--text-secondary)] font-medium mt-2 text-sm md:text-base">หลักสูตรรับรอง</div>
                        <div className="mt-4 flex items-center gap-1 text-xs text-emerald-500 font-medium">
                          <Award className="w-3 h-3" /> มาตรฐานสากล
                        </div>
                     </div>
                   </TiltCard>
-                )}
+                ) : null}
 
               </div>
             </section>

@@ -37,9 +37,11 @@ export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string
       } else {
         setNavLinks([
           { name: 'หน้าแรก', href: '/', tab: 'home' },
+          { name: 'AI Pathway', href: '#ai-pathway', tab: 'home' },
+          { name: 'การตรวจสอบ', href: '#verification', tab: 'home' },
           { name: 'หลักสูตร', href: '/', tab: 'courses' },
-          { name: 'บทความ', href: '/blog', tab: 'blog' },
-          { name: 'ระบบสารสนเทศ', href: '/systems', tab: 'systems' },
+          { name: 'บทความ', href: '#news', tab: 'home' },
+          { name: 'สถิติ', href: '#stats', tab: 'home' },
         ]);
       }
 
@@ -66,12 +68,20 @@ export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8 text-xs tracking-tight">
+            <div className="hidden md:flex items-center space-x-6 text-xs tracking-tight">
               {navLinks.map((link) => (
                 <Link 
                   key={link.name}
                   href={link.href} 
-                  onClick={() => { if (link.tab) setActiveTab?.(link.tab); }}
+                  onClick={(e) => { 
+                    if (link.tab) setActiveTab?.(link.tab);
+                    // Smooth scroll for anchor links
+                    if (link.href.startsWith('#')) {
+                      e.preventDefault();
+                      const element = document.querySelector(link.href);
+                      element?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
                   className={`opacity-80 hover:opacity-100 transition-opacity ${activeTab === link.tab ? 'font-semibold opacity-100' : 'font-medium'}`}
                 >
                   {link.name}
@@ -108,9 +118,17 @@ export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string
               <Link 
                 key={link.name}
                 href={link.href} 
-                onClick={() => {
+                onClick={(e) => {
                   if (link.tab) setActiveTab?.(link.tab);
                   setIsMenuOpen(false);
+                  // Smooth scroll for anchor links
+                  if (link.href.startsWith('#')) {
+                    e.preventDefault();
+                    setTimeout(() => {
+                      const element = document.querySelector(link.href);
+                      element?.scrollIntoView({ behavior: 'smooth' });
+                    }, 300);
+                  }
                 }}
                 className={`border-b border-[var(--apple-border)] pb-4 ${activeTab === link.tab ? 'text-[var(--accent)]' : ''}`}
               >
