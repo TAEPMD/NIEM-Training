@@ -189,9 +189,9 @@ export default function App() {
     <div className="min-h-screen bg-[var(--bg-primary)] font-sans text-[var(--text-primary)]">
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <main className="pt-12 w-full overflow-x-hidden">
+      <main className="w-full overflow-x-hidden">
         {activeTab === 'home' && (
-          <div className="space-y-4">
+          <div className="">
             
             {/* Hero Section - New Design with Gradient & Parallax */}
             <section 
@@ -266,9 +266,9 @@ export default function App() {
             {/* Main Features Grid - 3D Tilt Cards */}
             <section 
               ref={featuresReveal.ref}
-              className="bg-[var(--bg-primary)] py-8 max-w-[1400px] mx-auto px-4 md:px-6"
+              className="bg-[var(--bg-primary)] py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
             >
-              <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 transition-all duration-700 ${featuresReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 transition-all duration-700 ${featuresReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                 
                 {/* AI Assistant Card - With 3D Tilt */}
                 <TiltCard className="group">
@@ -398,9 +398,9 @@ export default function App() {
             {/* Secondary Grid Features - Scroll Reveal */}
             <section 
               ref={statsReveal.ref}
-              className="bg-[var(--bg-primary)] py-4 max-w-[1400px] mx-auto px-4 md:px-6"
+              className="bg-[var(--bg-primary)] py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
             >
-              <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 transition-all duration-700 delay-200 ${statsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-700 delay-200 ${statsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                 
                 {/* News card */}
                 {isLoading ? (
@@ -461,7 +461,7 @@ export default function App() {
             </section>
 
             {/* Trust Section - New Addition */}
-            <section className="bg-[var(--bg-primary)] py-12 max-w-[1400px] mx-auto px-4 md:px-6">
+            <section className="bg-[var(--bg-primary)] py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="apple-card p-8 md:p-12 text-center" style={{ background: 'var(--gradient-dark-card)' }}>
                 <h3 className="text-2xl md:text-3xl font-bold text-white mb-8">ได้รับการรับรองโดย</h3>
                 <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-60">
