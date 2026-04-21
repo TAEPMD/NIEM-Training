@@ -1,11 +1,25 @@
 'use client';
 
-import React from 'react';
-import { useTheme } from './ThemeProvider';
+import React, { useEffect, useState, useContext } from 'react';
+import { ThemeContext } from './ThemeProvider';
 import { Sun, Moon, Monitor } from 'lucide-react';
 
 export default function ThemeToggle() {
-  const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  
+  // Handle SSR - only render theme UI after mount on client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Use context directly with fallback for SSR (avoid throwing error)
+  const context = useContext(ThemeContext);
+  
+  // Fallback values for SSR when context is not available
+  const theme = context?.theme ?? 'system';
+  const resolvedTheme = context?.resolvedTheme ?? 'light';
+  const setTheme = context?.setTheme ?? (() => {});
+  const toggleTheme = context?.toggleTheme ?? (() => {});
 
   const getIcon = () => {
     if (theme === 'system') return <Monitor className="w-4 h-4" />;
@@ -18,6 +32,17 @@ export default function ThemeToggle() {
     if (theme === 'dark') return 'Dark';
     return 'Light';
   };
+
+  // Prevent hydration mismatch - render placeholder during SSR
+  if (!mounted) {
+    return (
+      <div className="flex items-center gap-1" aria-hidden="true">
+        <div className="p-2 rounded-full opacity-50">
+          <Monitor className="w-4 h-4" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-1">
