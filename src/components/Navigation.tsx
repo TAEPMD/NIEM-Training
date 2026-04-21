@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Activity, Menu, X, Search, User } from 'lucide-react';
 import { supabase } from '@/utils/supabase';
+import ThemeToggle from './ThemeToggle';
 
 interface NavPage {
   title: string;
@@ -84,9 +85,10 @@ export default function Navbar({ activeTab, setActiveTab }: { activeTab?: string
             </div>
 
             {/* Right Icons */}
-            <div className="hidden md:flex items-center space-x-6 opacity-80">
-               <button className="hover:opacity-100 transition-opacity"><Search className="w-4 h-4" /></button>
-               <button className="hover:opacity-100 transition-opacity"><User className="w-4 h-4" /></button>
+            <div className="hidden md:flex items-center space-x-4 opacity-80">
+               <ThemeToggle />
+               <button className="hover:opacity-100 transition-opacity p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full"><Search className="w-4 h-4" /></button>
+               <button className="hover:opacity-100 transition-opacity p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full"><User className="w-4 h-4" /></button>
             </div>
 
             {/* Mobile Menu Button */}
