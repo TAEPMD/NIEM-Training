@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import { 
-  Activity, Globe, FileText, ShieldAlert, 
-  ChevronRight, ExternalLink, Search, Loader2, Sparkles
+import {
+  Activity, Globe, FileText, ShieldAlert,
+  ArrowUpRight, Search, Loader2,
 } from 'lucide-react';
 import { supabase } from '@/utils/supabase';
 
@@ -26,132 +26,152 @@ export default function SystemsPage() {
   useEffect(() => {
     const fetchSystems = async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('systems')
         .select('*')
         .order('id', { ascending: true });
-      
       if (data) setSystems(data);
       setLoading(false);
     };
-
     fetchSystems();
   }, []);
 
-  const getSystemIcon = (name: string) => {
-    switch(name) {
-      case 'ShieldAlert': return <ShieldAlert className="w-8 h-8" />;
-      case 'Globe': return <Globe className="w-8 h-8" />;
-      case 'FileText': return <FileText className="w-8 h-8" />;
-      default: return <Activity className="w-8 h-8" />;
+  const getIcon = (name: string) => {
+    switch (name) {
+      case 'ShieldAlert': return ShieldAlert;
+      case 'Globe': return Globe;
+      case 'FileText': return FileText;
+      default: return Activity;
     }
   };
 
-  const filteredSystems = systems.filter(s => 
+  const filtered = systems.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex flex-col uppercase-none">
+    <div className="min-h-screen bg-[var(--bg-primary)] font-sans flex flex-col text-[var(--text-primary)]">
       <Navbar />
 
-      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 w-full">
-        {/* Header Section */}
-        <div className="mb-16 text-center">
-          <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-100 text-blue-600 text-xs font-black mb-6 tracking-widest uppercase">
-            <Globe className="w-3 h-3 mr-2" /> Digital Infrastructure
+      <main className="flex-grow pt-16">
+        {/* Masthead */}
+        <section className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 pt-12 md:pt-20 pb-14">
+          <div className="flex items-center justify-between pb-6 border-b border-[var(--rule)]">
+            <div className="kicker">Directory · Digital Infrastructure</div>
+            <div className="kicker hidden sm:block">Section 03</div>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
-             ระบบสารสนเทศ <span className="text-blue-600">NIEM Center</span>
-          </h1>
-          <p className="text-slate-500 text-lg max-w-2xl mx-auto font-medium">
-            รวมช่องทางการเข้าถึงระบบงานและฐานข้อมูลต่างๆ ของสถาบันการแพทย์ฉุกเฉินแห่งชาติ 
-            เพื่อความสะดวกในการปฏิบัติงานของบุคลากรและเจ้าหน้าที่
-          </p>
-        </div>
 
-        {/* Search Bar */}
-        <div className="max-w-2xl mx-auto mb-16 relative group">
-          <div className="absolute inset-0 bg-blue-500/5 blur-3xl rounded-full opacity-0 group-focus-within:opacity-100 transition"></div>
-          <input 
-            type="text" 
-            placeholder="ค้นหาชื่อระบบ เช่น ITEMS, EMS..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-16 pr-8 py-6 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 focus:ring-4 focus:ring-blue-50 outline-none transition-all font-bold text-slate-800 relative z-10"
-          />
-          <Search className="w-6 h-6 text-slate-300 absolute left-8 top-6 group-focus-within:text-blue-600 transition relative z-10" />
-        </div>
-
-        {loading ? (
-          <div className="h-64 flex items-center justify-center">
-            <Loader2 className="w-12 h-12 text-blue-200 animate-spin" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredSystems.map(system => (
-              <a 
-                key={system.id}
-                href={system.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-blue-900/5 hover:border-blue-100 transition-all duration-500 flex flex-col transform hover:-translate-y-2"
-              >
-                <div className="flex justify-between items-start mb-8">
-                  <div className="bg-slate-50 p-5 rounded-[2rem] text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 transform group-hover:rotate-6 shadow-sm">
-                    {getSystemIcon(system.icon_name)}
-                  </div>
-                  <div className="p-3 rounded-full bg-slate-50 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-blue-600 transition-all duration-300">
-                    <ExternalLink className="w-5 h-5" />
-                  </div>
-                </div>
-                
-                <h3 className="text-2xl font-black text-slate-800 mb-4 group-hover:text-blue-600 transition tracking-tight">
-                  {system.name}
-                </h3>
-                
-                <p className="text-slate-500 text-sm font-medium leading-relaxed mb-10 flex-grow">
-                  {system.description}
-                </p>
-                
-                <div className="flex items-center text-xs font-black text-blue-600 uppercase tracking-widest pt-6 border-t border-slate-50">
-                   Access Portal <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition" />
-                </div>
-              </a>
-            ))}
-
-            {filteredSystems.length === 0 && (
-              <div className="col-span-full py-20 text-center text-slate-400">
-                <div className="bg-white/50 backdrop-blur-sm border border-dashed border-slate-200 rounded-[3rem] p-16">
-                  <div className="text-xl font-bold mb-2">ไม่พบระบบที่คุณค้นหา</div>
-                  <p className="text-sm opacity-60 font-medium tracking-tight">โปรดลองใช้คำค้นหาอื่น หรือดูรายการทั้งหมด</p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Feature Banner */}
-        <div className="mt-24 bg-slate-900 rounded-[3rem] p-10 md:p-20 relative overflow-hidden text-center md:text-left">
-          <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-             <Sparkles className="w-96 h-96 text-white" />
-          </div>
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
-            <div className="max-w-xl">
-              <h2 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight leading-tight">
-                แจ้งปัญหาการใช้งาน หรือ <br/> ขอนำระบบเข้าฐานข้อมูล
-              </h2>
-              <p className="text-blue-100/60 font-medium text-lg">
-                หากท่านพบปัญหาในการเข้าใช้งานระบบสารสนเทศ หรือต้องการเพิ่มระบบใหม่เข้าสู่ระบบส่วนกลาง 
-                โปรดแจ้งฝ่ายเทคโนโลยีสารสนเทศ NIEM
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-12 md:pt-16">
+            <div className="lg:col-span-8">
+              <h1 className="display-hero text-[var(--text-primary)]">
+                ระบบสารสนเทศ<br />
+                <span className="serif-italic accent-text">NIEM Center</span>
+              </h1>
+            </div>
+            <div className="lg:col-span-4 lg:pl-6 lg:border-l lg:border-[var(--rule)] flex flex-col justify-end">
+              <p className="text-base text-[var(--text-secondary)] leading-relaxed">
+                ช่องทางเข้าสู่ระบบงานและฐานข้อมูลของสถาบันการแพทย์ฉุกเฉินแห่งชาติ เพื่อให้บุคลากรปฏิบัติงานได้อย่างรวดเร็วและปลอดภัย
               </p>
             </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-6 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-2xl shadow-blue-900/50 transition transform hover:scale-[1.05] active:scale-95 whitespace-nowrap">
-              ติดต่อแจ้งความประสงค์
-            </button>
           </div>
-        </div>
+        </section>
+
+        {/* Search */}
+        <section className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 pb-10">
+          <div className="pt-6 border-t border-[var(--rule)] flex items-center gap-4">
+            <div className="relative flex-grow max-w-xl">
+              <Search className="w-4 h-4 absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" strokeWidth={1.6} />
+              <input
+                type="text"
+                placeholder="ค้นหาชื่อระบบ เช่น ITEMS, EMS..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="ed-input w-full pl-12 pr-5 py-3 rounded-full text-sm"
+              />
+            </div>
+            <div className="kicker hidden md:block">{filtered.length} / {systems.length} รายการ</div>
+          </div>
+        </section>
+
+        {/* Grid */}
+        <section className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 pb-20">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-24">
+              <Loader2 className="w-6 h-6 text-[var(--text-secondary)] animate-spin mb-4" strokeWidth={1.5} />
+              <div className="kicker">Loading systems</div>
+            </div>
+          ) : filtered.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+              {filtered.map((system, idx) => {
+                const Icon = getIcon(system.icon_name);
+                return (
+                  <a
+                    key={system.id}
+                    href={system.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group ed-card hover-lift p-8 flex flex-col min-h-[260px] relative overflow-hidden"
+                  >
+                    <div className="flex items-start justify-between mb-10">
+                      <div className="w-11 h-11 rounded-2xl bg-[var(--bg-tertiary)] text-[var(--text-primary)] flex items-center justify-center group-hover:bg-[var(--accent)] group-hover:text-[var(--accent-ink)] transition-colors">
+                        <Icon className="w-5 h-5" strokeWidth={1.6} />
+                      </div>
+                      <div className="kicker text-[var(--text-tertiary)]">№ {String(idx + 1).padStart(2, '0')}</div>
+                    </div>
+
+                    <div className="flex-grow">
+                      <h3 className="text-xl md:text-2xl font-medium tracking-tight text-[var(--text-primary)] mb-2 group-hover:accent-text transition-colors">
+                        {system.name}
+                      </h3>
+                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-3">
+                        {system.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t border-[var(--rule)] flex items-center justify-between">
+                      <span className="kicker-accent">Access Portal</span>
+                      <ArrowUpRight className="w-5 h-5 text-[var(--text-tertiary)] group-hover:text-[var(--accent-deep)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" strokeWidth={1.6} />
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="ed-card p-16 text-center">
+              <div className="kicker mb-3">No Results</div>
+              <h2 className="display-md text-[var(--text-primary)] mb-2">ไม่พบระบบที่ค้นหา</h2>
+              <p className="text-[var(--text-secondary)]">ลองเปลี่ยนคำค้นหาหรือดูรายการทั้งหมด</p>
+            </div>
+          )}
+        </section>
+
+        {/* Banner */}
+        <section className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 pb-24">
+          <div
+            className="relative overflow-hidden rounded-3xl p-10 md:p-16 lg:p-20"
+            style={{ background: 'var(--surface-ink)' }}
+          >
+            <div className="absolute inset-0 dot-grid opacity-[0.15] pointer-events-none" />
+            <div className="relative grid grid-cols-1 md:grid-cols-12 gap-10">
+              <div className="md:col-span-8">
+                <div className="kicker-accent mb-5" style={{ color: 'var(--accent)' }}>แจ้งปัญหา / ขอเพิ่มระบบ</div>
+                <h2 className="display-lg text-white">
+                  ต้องการเพิ่มระบบเข้าสู่<br />
+                  <span className="serif-italic" style={{ color: 'var(--accent)' }}>ฐานข้อมูลส่วนกลาง?</span>
+                </h2>
+                <p className="mt-6 text-white/60 leading-relaxed max-w-xl">
+                  หากพบปัญหาในการเข้าใช้งาน หรือต้องการเพิ่มระบบใหม่เข้าสู่หน้ารวม โปรดแจ้งฝ่ายเทคโนโลยีสารสนเทศ NIEM
+                </p>
+              </div>
+              <div className="md:col-span-4 flex items-end md:justify-end">
+                <button className="btn-primary px-6 py-3.5 text-sm flex items-center gap-2">
+                  ติดต่อแจ้งความประสงค์ <ArrowUpRight className="w-4 h-4" strokeWidth={1.8} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       <Footer />

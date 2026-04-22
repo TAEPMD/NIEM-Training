@@ -19,17 +19,17 @@ interface ToastContextType {
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 const icons = {
-  success: <CheckCircle className="w-5 h-5 text-emerald-500" />,
-  error: <AlertCircle className="w-5 h-5 text-rose-500" />,
-  info: <Info className="w-5 h-5 text-blue-500" />,
-  warning: <AlertTriangle className="w-5 h-5 text-amber-500" />,
+  success: <CheckCircle className="w-[18px] h-[18px] text-[var(--accent-deep)] dark:text-[var(--accent)]" strokeWidth={1.6} />,
+  error: <AlertCircle className="w-[18px] h-[18px] text-rose-500" strokeWidth={1.6} />,
+  info: <Info className="w-[18px] h-[18px] text-[var(--text-primary)]" strokeWidth={1.6} />,
+  warning: <AlertTriangle className="w-[18px] h-[18px] text-[var(--accent-deep)] dark:text-[var(--accent)]" strokeWidth={1.6} />,
 };
 
-const bgColors = {
-  success: 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800',
-  error: 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800',
-  info: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800',
-  warning: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800',
+const leftAccent = {
+  success: 'before:bg-[var(--accent)]',
+  error: 'before:bg-rose-500',
+  info: 'before:bg-[var(--text-primary)]',
+  warning: 'before:bg-[var(--accent)]',
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -58,16 +58,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((toast, index) => (
           <div
             key={toast.id}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg backdrop-blur-sm ${bgColors[toast.type]} animate-fade-in-up`}
+            className={`relative flex items-center gap-3 pl-5 pr-3 py-3.5 rounded-2xl border border-[var(--rule-strong)] shadow-[0_12px_40px_-12px_rgba(0,0,0,0.18)] bg-[var(--bg-secondary)] backdrop-blur-sm before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-full ${leftAccent[toast.type]} animate-fade-in-up min-w-[280px]`}
             style={{ animationDelay: `${index * 100}ms` }}
           >
             {icons[toast.type]}
-            <p className="text-sm font-medium text-[var(--text-primary)] pr-2">{toast.message}</p>
+            <p className="text-sm font-medium text-[var(--text-primary)] pr-2 tracking-tight">{toast.message}</p>
             <button
               onClick={() => hideToast(toast.id)}
-              className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+              className="ml-auto p-1.5 rounded-full hover:bg-[var(--bg-tertiary)] transition-colors"
+              aria-label="Dismiss"
             >
-              <X className="w-4 h-4 text-[var(--text-secondary)]" />
+              <X className="w-3.5 h-3.5 text-[var(--text-secondary)]" strokeWidth={1.8} />
             </button>
           </div>
         ))}

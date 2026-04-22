@@ -1,72 +1,23 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { useToast } from '@/components/Toast';
-import { CardSkeleton, HeroSkeleton, NewsSkeleton, StatsSkeleton, SearchSkeleton } from '@/components/Skeleton';
-import { 
-  Search, Users, Award, Building2, TrendingUp, ChevronRight, Activity, Sparkles, Loader2, 
-  ArrowRight, Zap, Shield, GraduationCap, HeartPulse, Stethoscope, Ambulance, AlertCircle
+import { NewsSkeleton, StatsSkeleton, SearchSkeleton } from '@/components/Skeleton';
+import {
+  Search, Users, Award, TrendingUp, ArrowUpRight, Sparkles, Loader2,
+  ArrowRight, Shield, GraduationCap, AlertCircle, Plus,
 } from 'lucide-react';
 import { supabase } from '@/utils/supabase';
 
 interface CourseItem { id: number; name: string; category: string; status: string; }
 interface SearchResult { name?: string; course?: string; date?: string; status?: string; error?: string; }
+interface HeroData { title?: string; subtitle?: string; button_text?: string; button2_text?: string; }
+interface NewsItem { id: number; title: string; slug: string; category: string; created_at?: string; summary?: string; }
 
-// 3D Tilt Card Component
-function TiltCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [transform, setTransform] = useState('rotateX(0deg) rotateY(0deg)');
-  const [shinePosition, setShinePosition] = useState({ x: 0, y: 0 });
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    const rotateX = ((y - centerY) / centerY) * -8;
-    const rotateY = ((x - centerX) / centerX) * 8;
-    
-    setTransform(`rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`);
-    setShinePosition({ x: (x / rect.width) * 100, y: (y / rect.height) * 100 });
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setTransform('rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
-  }, []);
-
-  return (
-    <div
-      ref={cardRef}
-      className={`card-tilt ${className}`}
-      style={{ 
-        transform: transform,
-        transformStyle: 'preserve-3d',
-        transition: 'transform 0.15s ease-out',
-        width: '100%',
-        minWidth: 0
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div 
-        className="absolute inset-0 rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-        style={{
-          background: `radial-gradient(circle at ${shinePosition.x}% ${shinePosition.y}%, rgba(255,255,255,0.3) 0%, transparent 60%)`
-        }}
-      />
-      {children}
-    </div>
-  );
-}
-
-// Scroll Reveal Hook
-function useScrollReveal(threshold = 0.1) {
+function useScrollReveal(threshold = 0.12) {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -80,11 +31,7 @@ function useScrollReveal(threshold = 0.1) {
       },
       { threshold }
     );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
+    if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, [threshold]);
 
@@ -97,30 +44,32 @@ export default function App() {
   const [searchCert, setSearchCert] = useState('');
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
 
-  // AI Features State
   const [aiQuery, setAiQuery] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState('');
 
   const [coursesList, setCoursesList] = useState<CourseItem[]>([]);
-  const [dbNews, setDbNews] = useState<any[]>([]);
-  const [heroData, setHeroData] = useState<any>(null);
-  
-  // Stats from database
-  const [stats, setStats] = useState({
-    staffCount: 0,
-    courseCount: 0,
-    staffGrowth: 0
-  });
+  const [dbNews, setDbNews] = useState<NewsItem[]>([]);
+  const [heroData, setHeroData] = useState<HeroData | null>(null);
 
-  // Loading States
+  const [stats, setStats] = useState({ staffCount: 0, courseCount: 0, staffGrowth: 0 });
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Scroll reveal refs
+  const [clock, setClock] = useState<string>('');
+
   const heroReveal = useScrollReveal(0.1);
   const featuresReveal = useScrollReveal(0.1);
   const statsReveal = useScrollReveal(0.1);
+
+  useEffect(() => {
+    const update = () => {
+      const now = new Date();
+      setClock(now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + ' BKK');
+    };
+    update();
+    const t = setInterval(update, 30_000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -129,34 +78,30 @@ export default function App() {
         const { data: courses } = await supabase.from('courses').select('*').limit(6);
         if (courses) setCoursesList(courses);
 
-        const { data: news } = await supabase.from('blogs').select('*').eq('status', 'Published').order('created_at', { ascending: false }).limit(2);
+        const { data: news } = await supabase.from('blogs').select('*').eq('status', 'Published').order('created_at', { ascending: false }).limit(3);
         if (news) setDbNews(news);
 
         const { data: hero } = await supabase.from('settings').select('*').eq('key', 'hero').single();
         if (hero && hero.value) setHeroData(hero.value);
-        
-        // Fetch stats - try to get real data, fallback to 0 if not available
+
         const { count: courseCount } = await supabase.from('courses').select('*', { count: 'exact', head: true });
         const { data: settings } = await supabase.from('settings').select('*').in('key', ['staff_count', 'staff_growth']);
-        
+
         const staffSetting = settings?.find(s => s.key === 'staff_count');
         const growthSetting = settings?.find(s => s.key === 'staff_growth');
-        
+
         setStats({
           staffCount: staffSetting?.value || 0,
           courseCount: courseCount || 0,
-          staffGrowth: growthSetting?.value || 0
+          staffGrowth: growthSetting?.value || 0,
         });
-        
-        showToast('ยินดีต้อนรับสู่ NIEM Training', 'info');
       } catch (error) {
+        console.error(error);
         showToast('เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
       } finally {
-        // Simulate loading for demo purposes - remove in production if data loads instantly
-        setTimeout(() => setIsLoading(false), 800);
+        setTimeout(() => setIsLoading(false), 400);
       }
     };
-
     fetchHomeData();
   }, [showToast]);
 
@@ -178,8 +123,8 @@ export default function App() {
   const handleAiRecommendation = async () => {
     if (!aiQuery.trim()) return;
     setIsAiLoading(true); setAiError(''); setAiResponse('');
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY; 
-    const model = "gemini-1.5-flash";
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const model = 'gemini-1.5-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     const prompt = `คุณคือผู้เชี่ยวชาญด้านการแพทย์ฉุกเฉิน (EMS) และกู้ภัย ของสถาบันการแพทย์ฉุกเฉิน... แนะนำหลักสูตรสั้นๆ สำหรับคนที่มีเป้าหมาย: "${aiQuery}"`;
 
@@ -187,10 +132,10 @@ export default function App() {
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
       });
       const data = await response.json();
-      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "แนะนำให้ลองตรวจสอบข้อมูลเพิ่มเติมที่หน้าหลักสูตร";
+      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'แนะนำให้ลองตรวจสอบข้อมูลเพิ่มเติมที่หน้าหลักสูตร';
       setAiResponse(responseText);
       showToast('AI วิเคราะห์เส้นทางสำเร็จ', 'success');
     } catch {
@@ -205,302 +150,409 @@ export default function App() {
     <div className="min-h-screen bg-[var(--bg-primary)] font-sans text-[var(--text-primary)]">
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <main className="w-full overflow-x-hidden">
+      <main className="w-full overflow-x-hidden pt-16">
         {activeTab === 'home' && (
-          <div className="">
-            
-            {/* Compact Hero Section */}
-            <section 
+          <>
+            {/* ——————— HERO ——————— */}
+            <section
               ref={heroReveal.ref}
-              className="relative min-h-[300px] sm:min-h-[350px] md:min-h-[400px] flex flex-col items-center justify-center text-center px-4 py-16 overflow-hidden"
-              style={{
-                background: 'var(--gradient-hero)'
-              }}
+              className="relative max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 pt-12 pb-24 md:pt-20 md:pb-32"
             >
-              {/* Subtle Background Elements */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-50">
-                <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[var(--accent)]/10 rounded-full blur-[80px]" />
-                <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-blue-500/10 rounded-full blur-[60px]" />
+              {/* Top status bar */}
+              <div className={`flex items-center justify-between pb-8 border-b border-[var(--rule)] transition-all duration-700 ${heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+                <div className="flex items-center gap-4">
+                  <span className="kicker-accent flex items-center gap-2">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[var(--accent)]" />
+                    </span>
+                    เปิดรับสมัครรอบใหม่
+                  </span>
+                </div>
+                <div className="hidden sm:flex items-center gap-6 kicker">
+                  <span>TH · EN</span>
+                  <span>{clock}</span>
+                  <span>№ 2026 / Q2</span>
+                </div>
               </div>
 
-              {/* Hero Content */}
-              <div className={`relative z-10 max-w-4xl mx-auto transition-all duration-1000 ${heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-4">
-                  <Sparkles className="w-3 h-3 text-[var(--accent)]" />
-                  <span className="text-xs font-medium text-white/90">AI วิเคราะห์เส้นทางอาชีพ</span>
+              {/* Display */}
+              <div className={`grid grid-cols-1 lg:grid-cols-12 gap-8 pt-14 md:pt-20 transition-all duration-1000 ${heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <div className="lg:col-span-8">
+                  <div className="kicker mb-6">Issue 01 — ศูนย์ฝึกอบรม NIEM</div>
+                  <h1 className="display-hero text-[var(--text-primary)]">
+                    {heroData?.title || 'ยกระดับมาตรฐาน'}
+                    <br />
+                    <span className="serif-italic accent-text">การแพทย์ฉุกเฉิน</span>
+                    <br />
+                    สู่ความเป็นเลิศ
+                    <span className="inline-block w-3 h-3 rounded-full bg-[var(--accent)] align-top ml-3 mt-4 md:mt-8" />
+                  </h1>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 text-white">
-                  <span className="block">{heroData?.title || 'ศูนย์ฝึกอบรม'}</span>
-                  <span className="gradient-text">{heroData?.subtitle?.split(' ')[0] || 'ก้าวสู่ความเป็นเลิศ'}</span>
-                </h1>
-                
-                <p className="text-sm md:text-base lg:text-lg font-medium text-white/70 max-w-xl mx-auto mb-6 leading-relaxed px-4">
-                  {heroData?.subtitle || 'ยกระดับมาตรฐานการแพทย์ฉุกเฉิน'}
-                </p>
+                <div className="lg:col-span-4 lg:pl-6 lg:border-l lg:border-[var(--rule)] flex flex-col justify-end">
+                  <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed max-w-md mb-8">
+                    {heroData?.subtitle || 'สถาบันการแพทย์ฉุกเฉินแห่งชาติ เปิดหลักสูตรรับรองมาตรฐานสากล สำหรับบุคลากรกู้ชีพและกู้ภัยทั่วประเทศ'}
+                  </p>
 
-                {/* CTA Buttons */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                  <button 
-                    onClick={() => setActiveTab('courses')} 
-                    className="group btn-gradient text-white px-6 py-2.5 rounded-full font-semibold text-sm flex items-center gap-2"
-                  >
-                    {heroData?.button_text || 'ดูเพิ่มเติม'}
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('cert')} 
-                    className="group px-6 py-2.5 rounded-full font-semibold text-sm text-white border border-white/30 hover:bg-white/10 transition-all flex items-center gap-2"
-                  >
-                    <Shield className="w-4 h-4" />
-                    {heroData?.button2_text || 'ระบบตรวจสอบ'}
-                  </button>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={() => setActiveTab('courses')}
+                      className="btn-primary px-6 py-3 text-sm flex items-center gap-2 group"
+                    >
+                      {heroData?.button_text || 'ดูหลักสูตรทั้งหมด'}
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" strokeWidth={1.8} />
+                    </button>
+                    <a
+                      href="#verification"
+                      className="btn-ghost px-6 py-3 text-sm flex items-center gap-2"
+                    >
+                      <Shield className="w-4 h-4" strokeWidth={1.6} />
+                      {heroData?.button2_text || 'ตรวจสอบวุฒิ'}
+                    </a>
+                  </div>
                 </div>
+              </div>
+
+              {/* Ticker row */}
+              <div className="mt-20 md:mt-28 pt-6 border-t border-[var(--rule)] grid grid-cols-2 md:grid-cols-4 gap-6">
+                {[
+                  { label: 'Accreditation', value: 'ISO / สพฉ.' },
+                  { label: 'Pathway', value: 'EMR → Paramedic' },
+                  { label: 'Language', value: 'ไทย · English' },
+                  { label: 'Format', value: 'On-site · Online' },
+                ].map((item) => (
+                  <div key={item.label}>
+                    <div className="kicker mb-2">{item.label}</div>
+                    <div className="text-sm md:text-base font-medium text-[var(--text-primary)] tracking-tight">{item.value}</div>
+                  </div>
+                ))}
               </div>
             </section>
 
-            {/* Main Features Grid - 3D Tilt Cards */}
-            <section 
+            {/* ——————— FEATURE GRID ——————— */}
+            <section
+              id="ai-pathway"
               ref={featuresReveal.ref}
-              className="bg-[var(--bg-primary)] py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+              className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 pb-24"
             >
-              <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 transition-all duration-700 ${featuresReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                
-                {/* AI Assistant Card - With 3D Tilt */}
-                <div id="ai-pathway" className="scroll-mt-20">
-                  <TiltCard className="group">
-                  <div className="apple-card gradient-card-1 p-8 sm:p-10 md:p-14 text-center flex flex-col items-center justify-center min-h-[400px] md:min-h-[500px] w-full relative overflow-hidden hover-lift">
-                    {/* Icon */}
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--accent)] to-blue-500 flex items-center justify-center mb-6 shadow-lg shadow-[var(--accent)]/20 group-hover:scale-110 transition-transform duration-300">
-                      <Zap className="w-8 h-8 text-white" />
-                    </div>
-                    
-                    <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-3 md:mb-4">
-                      <span className="gradient-text">AI</span> Pathway
-                    </h3>
-                    <p className="text-base sm:text-lg md:text-xl text-[var(--text-secondary)] font-medium mb-8 md:mb-10 px-2">วิเคราะห์เส้นทางอนาคตของคุณด้วย AI</p>
-                    
-                    {isLoading ? (
-                      <SearchSkeleton />
-                    ) : (
-                      <div className="w-full max-w-sm md:max-w-md flex flex-col gap-3 md:gap-4 relative z-10">
-                        <div className="relative">
-                          <input 
-                            type="text" 
-                            value={aiQuery} 
-                            onChange={(e) => setAiQuery(e.target.value)} 
-                            placeholder="บอกเป้าหมายอาชีพของคุณ..." 
-                            className="w-full px-5 md:px-6 py-3.5 md:py-4 rounded-full bg-[var(--bg-primary)] border-2 border-transparent focus:border-[var(--accent)] text-[var(--text-primary)] placeholder-[var(--text-secondary)] outline-none transition text-center text-sm md:text-base shadow-inner" 
-                            onKeyDown={(e) => e.key === 'Enter' && handleAiRecommendation()} 
-                          />
-                          <Sparkles className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-secondary)]" />
-                        </div>
-                        <button 
-                          onClick={handleAiRecommendation} 
-                          disabled={isAiLoading || !aiQuery.trim()} 
-                          className="btn-gradient text-white w-full py-3.5 md:py-4 rounded-full font-medium transition flex items-center justify-center gap-2 text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isAiLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Sparkles className="w-4 h-4" /> เริ่มการวิเคราะห์</>}
-                        </button>
-                      </div>
-                    )}
-
-                    {aiResponse && !isLoading && (
-                      <div className="mt-6 md:mt-8 text-left bg-white dark:bg-[#0a0a0a] p-5 md:p-6 rounded-2xl md:rounded-3xl w-full max-w-sm md:max-w-md animate-fade-in-up shadow-lg border border-[var(--apple-border)]">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
-                          <span className="text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">AI Analysis</span>
-                        </div>
-                        <div className="text-sm md:text-base font-medium leading-relaxed text-[var(--text-primary)]">{aiResponse}</div>
-                      </div>
-                    )}
-                    {aiError && !isLoading && <div className="mt-3 md:mt-4 text-rose-500 text-xs md:text-sm font-medium">{aiError}</div>}
-                  </div>
-                </TiltCard>
+              <div className="flex items-baseline justify-between mb-10 md:mb-14">
+                <div>
+                  <div className="kicker mb-3">01 — Core Services</div>
+                  <h2 className="display-lg text-[var(--text-primary)]">สิ่งที่ NIEM มอบให้คุณ</h2>
                 </div>
+                <Link href="/" className="hidden md:flex link-ed text-sm">
+                  ทั้งหมด <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.8} />
+                </Link>
+              </div>
 
-                {/* Verification Card - With 3D Tilt */}
-                <div id="verification" className="scroll-mt-20">
-                  <TiltCard className="group">
-                  <div className="apple-card p-8 sm:p-10 md:p-14 text-center flex flex-col items-center justify-center min-h-[400px] md:min-h-[500px] w-full relative overflow-hidden hover-lift" style={{ background: 'var(--gradient-dark-card)' }}>
-                    {/* Background Pattern */}
-                    <div className="absolute inset-0 opacity-5">
-                      <div className="absolute inset-0" style={{
-                        backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)`,
-                        backgroundSize: '24px 24px'
-                      }} />
+              <div className={`grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 transition-all duration-700 ${featuresReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+                {/* AI Pathway — large editorial card */}
+                <article className="lg:col-span-7 ed-card-feature relative overflow-hidden p-8 md:p-12 flex flex-col min-h-[480px] md:min-h-[560px]">
+                  <div className="flex items-start justify-between mb-10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-[var(--accent)] text-[var(--accent-ink)] flex items-center justify-center">
+                        <Sparkles className="w-4 h-4" strokeWidth={1.8} />
+                      </div>
+                      <div>
+                        <div className="kicker-accent">Feature № 01</div>
+                        <div className="text-[13px] text-[var(--text-secondary)]">AI Career Pathway</div>
+                      </div>
                     </div>
-                    
-                    {/* Icon */}
-                    <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center mb-6 border border-white/10 group-hover:scale-110 transition-transform duration-300">
-                      <Shield className="w-8 h-8 text-white" />
-                    </div>
-                    
-                    <h3 className="relative z-10 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-3 md:mb-4 text-white">
-                      การ<span className="text-[var(--accent)]">ตรวจสอบ</span>
+                    <div className="text-xs text-[var(--text-tertiary)] font-mono">/ai-pathway</div>
+                  </div>
+
+                  <div className="flex-grow flex flex-col justify-center max-w-xl">
+                    <h3 className="display-lg text-[var(--text-primary)] mb-4">
+                      เส้นทางอาชีพ<br />
+                      <span className="serif-italic accent-text">วิเคราะห์ด้วย AI</span>
                     </h3>
-                    <p className="relative z-10 text-base sm:text-lg md:text-xl text-white/60 font-medium mb-8 md:mb-10 px-2">ยืนยันวุฒิบัตรอย่างเป็นทางการ</p>
-                    
+                    <p className="text-[var(--text-secondary)] text-base leading-relaxed mb-8">
+                      บอกเป้าหมายของคุณ ระบบจะแนะนำหลักสูตร ลำดับ และเวลาโดยประมาณ — เพื่อให้ก้าวสู่วิชาชีพกู้ชีพได้อย่างแม่นยำ
+                    </p>
+
+                    {isLoading ? <SearchSkeleton /> : (
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={aiQuery}
+                            onChange={(e) => setAiQuery(e.target.value)}
+                            placeholder="พิมพ์เป้าหมายของคุณ เช่น: อยากเป็น Paramedic"
+                            className="ed-input w-full pl-5 pr-14 py-4 rounded-full text-sm"
+                            onKeyDown={(e) => e.key === 'Enter' && handleAiRecommendation()}
+                          />
+                          <button
+                            onClick={handleAiRecommendation}
+                            disabled={isAiLoading || !aiQuery.trim()}
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full btn-primary flex items-center justify-center disabled:opacity-40"
+                            aria-label="Analyze"
+                          >
+                            {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUpRight className="w-4 h-4" strokeWidth={1.8} />}
+                          </button>
+                        </div>
+
+                        {aiResponse && (
+                          <div className="mt-6 pt-6 border-t border-[var(--rule)] animate-fade-in-up">
+                            <div className="kicker-accent mb-3">AI Analysis</div>
+                            <div className="text-sm md:text-base leading-relaxed text-[var(--text-primary)]">{aiResponse}</div>
+                          </div>
+                        )}
+                        {aiError && <div className="text-rose-500 text-sm">{aiError}</div>}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Corner decoration */}
+                  <div className="absolute -right-10 -bottom-10 w-40 h-40 rounded-full bg-[var(--accent-glow)] blur-3xl pointer-events-none opacity-70" />
+                </article>
+
+                {/* Verification — dark ink card */}
+                <article
+                  id="verification"
+                  className="lg:col-span-5 ed-card-feature relative overflow-hidden p-8 md:p-12 flex flex-col min-h-[480px] md:min-h-[560px]"
+                  style={{ background: 'var(--surface-ink)', color: 'var(--bg-primary)' }}
+                >
+                  <div className="absolute inset-0 dot-grid opacity-[0.15] pointer-events-none" />
+
+                  <div className="relative flex items-start justify-between mb-10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center">
+                        <Shield className="w-4 h-4 text-white" strokeWidth={1.6} />
+                      </div>
+                      <div>
+                        <div className="kicker-accent" style={{ color: 'var(--accent)' }}>Feature № 02</div>
+                        <div className="text-[13px] text-white/60">Certificate Verify</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-white/40 font-mono">/verify</div>
+                  </div>
+
+                  <div className="relative flex-grow flex flex-col justify-center">
+                    <h3 className="display-md text-white mb-3">
+                      ตรวจสอบวุฒิบัตร<br />
+                      <span className="serif-italic text-[var(--accent)]">อย่างเป็นทางการ</span>
+                    </h3>
+                    <p className="text-white/60 text-sm leading-relaxed mb-8 max-w-sm">
+                      กรอกรหัสวุฒิบัตรเพื่อยืนยันสถานะและรายละเอียดผู้ถือใบรับรอง
+                    </p>
+
                     {isLoading ? (
-                      <div className="w-full max-w-sm md:max-w-md"><SearchSkeleton /></div>
+                      <div className="w-full"><SearchSkeleton /></div>
                     ) : (
-                      <form onSubmit={handleSearchCert} className="w-full max-w-sm md:max-w-md relative z-10">
-                        <div className="relative group/input">
-                          <Search className="w-4 h-4 md:w-5 md:h-5 absolute left-5 top-1/2 -translate-y-1/2 text-white/40 group-focus-within/input:text-[var(--accent)] transition-colors" />
-                          <input 
-                            type="text" 
-                            value={searchCert} 
-                            onChange={(e) => setSearchCert(e.target.value)} 
-                            placeholder="CERTIFICATE ID" 
-                            className="w-full pl-12 pr-5 py-3.5 md:py-4 rounded-full bg-white/10 text-white placeholder-white/40 focus:bg-white/20 outline-none transition text-sm font-medium border border-white/10 focus:border-[var(--accent)]/50 backdrop-blur-sm" 
+                      <form onSubmit={handleSearchCert} className="w-full">
+                        <div className="relative">
+                          <Search className="w-4 h-4 absolute left-5 top-1/2 -translate-y-1/2 text-white/40" strokeWidth={1.6} />
+                          <input
+                            type="text"
+                            value={searchCert}
+                            onChange={(e) => setSearchCert(e.target.value)}
+                            placeholder="NIEM-2026-001"
+                            className="w-full pl-12 pr-5 py-4 rounded-full bg-white/5 text-white placeholder-white/30 outline-none border border-white/10 focus:border-[var(--accent)]/60 transition text-sm font-mono tracking-tight"
                           />
                         </div>
-                        <button 
-                          type="submit" 
-                          className="mt-3 md:mt-4 bg-white text-black hover:bg-[var(--accent)] hover:text-white w-full py-3.5 md:py-4 rounded-full font-medium transition-all duration-300 text-sm md:text-base flex items-center justify-center gap-2"
+                        <button
+                          type="submit"
+                          className="mt-3 w-full py-4 rounded-full bg-[var(--accent)] text-[var(--accent-ink)] font-medium text-sm tracking-tight hover:bg-[var(--accent-bright)] transition"
                         >
-                          <Search className="w-4 h-4" /> ค้นหา
+                          ค้นหาวุฒิบัตร
                         </button>
                       </form>
                     )}
 
                     {searchResult && !isLoading && (
-                      <div className="mt-6 md:mt-8 text-left bg-white/10 backdrop-blur-md p-5 md:p-6 rounded-2xl md:rounded-3xl w-full max-w-sm md:max-w-md animate-fade-in-up relative z-10 border border-white/10">
+                      <div className="relative mt-6 pt-6 border-t border-white/10 animate-fade-in-up">
                         {searchResult.error ? (
-                          <div className="flex items-center gap-2 text-rose-400 font-medium text-sm md:text-base">
-                            <AlertCircle className="w-5 h-5" /> {searchResult.error}
+                          <div className="flex items-center gap-2 text-rose-400 text-sm">
+                            <AlertCircle className="w-4 h-4" strokeWidth={1.8} /> {searchResult.error}
                           </div>
                         ) : (
                           <div className="space-y-3">
-                             <div className="flex items-center gap-2">
-                               <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                               <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">สถานะ: <span className="text-emerald-400 ml-1">{searchResult.status}</span></span>
-                             </div>
-                             <div className="text-lg md:text-xl font-bold text-white leading-none">{searchResult.name}</div>
-                             <div className="text-xs md:text-sm text-white/50 leading-tight">{searchResult.course}</div>
-                             <div className="text-[10px] md:text-xs text-white/40 pt-2 border-t border-white/10">ออกเมื่อ {searchResult.date}</div>
+                            <div className="flex items-center gap-2">
+                              <span className="kicker-accent" style={{ color: 'var(--accent)' }}>สถานะ — {searchResult.status}</span>
+                            </div>
+                            <div className="text-xl font-medium text-white tracking-tight">{searchResult.name}</div>
+                            <div className="text-sm text-white/60">{searchResult.course}</div>
+                            <div className="text-xs text-white/40 font-mono pt-2">Issued {searchResult.date}</div>
                           </div>
                         )}
                       </div>
                     )}
-                    
-                    {/* Faded Background Word */}
-                    <div className="absolute font-bold text-[100px] md:text-[160px] text-white opacity-[0.03] bottom-[-20px] md:bottom-0 right-4 md:right-10 select-none pointer-events-none transform translate-y-1/4">
-                      CERT
-                    </div>
                   </div>
-                </TiltCard>
-                </div>
 
+                  {/* Big watermark */}
+                  <div className="absolute right-0 bottom-0 text-[120px] md:text-[160px] leading-none font-medium tracking-tight select-none pointer-events-none text-white opacity-[0.04]">
+                    CERT
+                  </div>
+                </article>
               </div>
             </section>
 
-            {/* Secondary Grid Features - Scroll Reveal */}
-            <section 
+            {/* ——————— STATS + NEWS ——————— */}
+            <section
               ref={statsReveal.ref}
-              className="bg-[var(--bg-primary)] py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+              className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 pb-24"
             >
-              <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-700 delay-200 ${statsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                
-                {/* News card */}
-                <div id="news" className="scroll-mt-20">
-                {isLoading ? (
-                  <NewsSkeleton />
-                ) : (
-                  dbNews.slice(0,1).map(news => (
-                    <TiltCard key={news.id} className="group cursor-pointer">
-                      <div className="apple-card gradient-card-2 p-8 md:p-10 flex flex-col justify-between min-h-[350px] md:min-h-[400px] hover-lift">
-                         <div>
-                           <span className="inline-block px-3 py-1 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] text-[10px] md:text-xs font-semibold mb-3 uppercase tracking-wider">{news.category}</span>
-                           <h4 className="text-xl sm:text-2xl font-bold tracking-tight mb-2 leading-tight group-hover:text-[var(--accent)] transition-colors">{news.title}</h4>
-                         </div>
-                         <Link href={`/blog/${news.slug}`} className="group/link text-[var(--text-secondary)] hover:text-[var(--accent)] flex items-center font-medium mt-8 md:mt-10 transition-colors text-sm md:text-base">
-                           อ่านต่อ <ArrowRight className="w-4 h-4 ml-1 group-hover/link:translate-x-1 transition-transform" />
-                         </Link>
+              <div className="flex items-baseline justify-between mb-10 md:mb-14">
+                <div>
+                  <div className="kicker mb-3">02 — Live from the Center</div>
+                  <h2 className="display-lg text-[var(--text-primary)]">ตัวเลขและเรื่องราว</h2>
+                </div>
+              </div>
+
+              <div className={`grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 transition-all duration-700 ${statsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+                {/* Stat 1 */}
+                <div className="md:col-span-4">
+                  {isLoading ? <StatsSkeleton /> : (
+                    <div className="ed-card p-8 md:p-10 h-full flex flex-col justify-between min-h-[280px]">
+                      <div className="flex items-start justify-between mb-8">
+                        <div className="kicker">Staff Active</div>
+                        <Users className="w-5 h-5 text-[var(--text-tertiary)]" strokeWidth={1.4} />
                       </div>
-                    </TiltCard>
-                  ))
-                )}
+                      <div>
+                        <div className="text-6xl md:text-7xl font-medium tracking-[-0.04em] text-[var(--text-primary)]">
+                          {stats.staffCount > 0 ? stats.staffCount.toLocaleString() : '—'}
+                        </div>
+                        <div className="mt-4 flex items-center justify-between">
+                          <div className="text-sm text-[var(--text-secondary)]">เจ้าหน้าที่ทีมรุก</div>
+                          {stats.staffGrowth > 0 && (
+                            <div className="flex items-center gap-1 text-xs accent-text font-medium">
+                              <TrendingUp className="w-3 h-3" strokeWidth={2} /> +{stats.staffGrowth}%
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Stat block 1 - Staff count */}
-                <div id="stats" className="scroll-mt-20">
-                {isLoading ? (
-                  <StatsSkeleton />
-                ) : stats.staffCount > 0 ? (
-                  <TiltCard className="group">
-                    <div className="apple-card gradient-card-3 p-8 md:p-10 flex flex-col justify-center items-center text-center min-h-[350px] md:min-h-[400px] hover-lift hover-glow">
-                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/20">
-                         <Users className="w-7 h-7 text-white" />
-                       </div>
-                       <div className="text-5xl sm:text-6xl font-bold tracking-tight gradient-text">{stats.staffCount.toLocaleString()}</div>
-                       <div className="text-[var(--text-secondary)] font-medium mt-2 text-sm md:text-base">เจ้าหน้าที่ทีมรุก</div>
-                       {stats.staffGrowth > 0 && (
-                         <div className="mt-4 flex items-center gap-1 text-xs text-emerald-500 font-medium">
-                           <TrendingUp className="w-3 h-3" /> +{stats.staffGrowth}% จากปีที่แล้ว
-                         </div>
-                       )}
+                {/* Stat 2 */}
+                <div className="md:col-span-4">
+                  {isLoading ? <StatsSkeleton /> : (
+                    <div className="ed-card p-8 md:p-10 h-full flex flex-col justify-between min-h-[280px]" style={{ background: 'var(--accent)', color: 'var(--accent-ink)', borderColor: 'var(--accent)' }}>
+                      <div className="flex items-start justify-between mb-8">
+                        <div className="text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-[var(--accent-ink)]/70">Courses Certified</div>
+                        <GraduationCap className="w-5 h-5 opacity-60" strokeWidth={1.4} />
+                      </div>
+                      <div>
+                        <div className="text-6xl md:text-7xl font-medium tracking-[-0.04em]">
+                          {stats.courseCount > 0 ? stats.courseCount : '—'}
+                        </div>
+                        <div className="mt-4 flex items-center justify-between">
+                          <div className="text-sm opacity-80">หลักสูตรรับรอง</div>
+                          <div className="flex items-center gap-1 text-xs font-medium">
+                            <Award className="w-3 h-3" strokeWidth={2} /> Certified
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </TiltCard>
-                ) : null}
+                  )}
                 </div>
 
-                {/* Stat block 2 - Course count */}
-                {isLoading ? (
-                  <StatsSkeleton />
-                ) : stats.courseCount > 0 ? (
-                  <TiltCard className="group">
-                    <div className="apple-card p-8 md:p-10 flex flex-col justify-center items-center text-center min-h-[350px] md:min-h-[400px] hover-lift border border-[var(--apple-border)]" style={{ background: 'var(--gradient-card-1)' }}>
-                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--accent)] to-teal-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-[var(--accent)]/20">
-                         <GraduationCap className="w-7 h-7 text-white" />
-                       </div>
-                       <div className="text-5xl sm:text-6xl font-bold tracking-tight text-[var(--text-primary)]">{stats.courseCount}</div>
-                       <div className="text-[var(--text-secondary)] font-medium mt-2 text-sm md:text-base">หลักสูตรรับรอง</div>
-                       <div className="mt-4 flex items-center gap-1 text-xs text-emerald-500 font-medium">
-                         <Award className="w-3 h-3" /> มาตรฐานสากล
-                       </div>
-                    </div>
-                  </TiltCard>
-                ) : null}
+                {/* Latest news */}
+                <div className="md:col-span-4">
+                  {isLoading ? <NewsSkeleton /> : (
+                    dbNews[0] ? (
+                      <Link href={`/blog/${dbNews[0].slug}`} className="ed-card hover-lift block p-8 md:p-10 h-full min-h-[280px] relative overflow-hidden">
+                        <div className="flex items-start justify-between mb-8">
+                          <div className="kicker">Latest Article</div>
+                          <ArrowUpRight className="w-5 h-5 text-[var(--text-tertiary)] group-hover:text-[var(--accent-deep)] transition-colors" strokeWidth={1.4} />
+                        </div>
+                        <div className="kicker-accent mb-3">{dbNews[0].category}</div>
+                        <h3 className="display-md text-[var(--text-primary)] leading-tight line-clamp-3">
+                          {dbNews[0].title}
+                        </h3>
+                        <div className="absolute bottom-8 right-8 w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center text-[var(--accent-ink)]">
+                          <ArrowUpRight className="w-4 h-4" strokeWidth={1.8} />
+                        </div>
+                      </Link>
+                    ) : (
+                      <div className="ed-card p-8 md:p-10 h-full min-h-[280px] flex flex-col justify-center">
+                        <Plus className="w-8 h-8 text-[var(--text-tertiary)] mb-4" strokeWidth={1.2} />
+                        <div className="text-sm text-[var(--text-secondary)]">ยังไม่มีบทความใหม่</div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
 
+              {/* Secondary news row */}
+              {dbNews.length > 1 && !isLoading && (
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                  {dbNews.slice(1, 3).map((news) => (
+                    <Link key={news.id} href={`/blog/${news.slug}`} className="group flex items-start gap-5 py-5 border-t border-[var(--rule)] hover:border-[var(--rule-strong)] transition-colors">
+                      <div className="shrink-0 w-14 h-14 rounded-xl bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--text-tertiary)] group-hover:bg-[var(--accent)] group-hover:text-[var(--accent-ink)] transition-colors">
+                        <ArrowUpRight className="w-5 h-5" strokeWidth={1.6} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="kicker-accent mb-1">{news.category}</div>
+                        <div className="text-base font-medium text-[var(--text-primary)] tracking-tight leading-snug line-clamp-2">
+                          {news.title}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* ——————— TRUST STRIP ——————— */}
+            <section className="border-y border-[var(--rule)] bg-[var(--bg-tertiary)]/60 overflow-hidden">
+              <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-8 md:py-10">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                  <div className="kicker">Accredited by</div>
+                  <div className="flex flex-wrap items-center gap-x-10 gap-y-3 text-[var(--text-primary)]">
+                    <span className="text-sm md:text-base font-medium tracking-tight">สถาบันการแพทย์ฉุกเฉินแห่งชาติ</span>
+                    <span className="text-[var(--rule-strong)]">·</span>
+                    <span className="text-sm md:text-base font-medium tracking-tight">กระทรวงสาธารณสุข</span>
+                    <span className="text-[var(--rule-strong)]">·</span>
+                    <span className="text-sm md:text-base font-medium tracking-tight">ISO 9001 : 2015</span>
+                    <span className="text-[var(--rule-strong)]">·</span>
+                    <span className="text-sm md:text-base font-medium tracking-tight serif-italic accent-text">RAL 1016</span>
+                  </div>
+                </div>
               </div>
             </section>
 
-            {/* Trust Section - New Addition */}
-            <section className="bg-[var(--bg-primary)] py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="apple-card p-8 md:p-12 text-center" style={{ background: 'var(--gradient-dark-card)' }}>
-                <h3 className="text-2xl md:text-3xl font-bold text-white mb-8">ได้รับการรับรองโดย</h3>
-                <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-60">
-                  <div className="flex items-center gap-2 text-white/80">
-                    <Building2 className="w-8 h-8" />
-                    <span className="font-semibold">สถาบันการแพทย์ฉุกเฉินแห่งชาติ</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-white/80">
-                    <Shield className="w-8 h-8" />
-                    <span className="font-semibold">มาตรฐานสากล ISO</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-white/80">
-                    <Award className="w-8 h-8" />
-                    <span className="font-semibold">กระทรวงสาธารณสุข</span>
+            {/* ——————— CTA ——————— */}
+            <section className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-24 md:py-32">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                <div className="md:col-span-7">
+                  <div className="kicker mb-5">03 — Next Step</div>
+                  <h2 className="display-hero text-[var(--text-primary)]">
+                    พร้อมก้าว<br />
+                    <span className="serif-italic accent-text">สู่บทถัดไป</span>?
+                  </h2>
+                </div>
+                <div className="md:col-span-5 md:border-l md:border-[var(--rule)] md:pl-8 flex flex-col justify-end">
+                  <p className="text-base text-[var(--text-secondary)] leading-relaxed mb-8">
+                    เปิดรับสมัครหลักสูตรรอบ Q2 / 2026 จำนวนจำกัด สมัครเลยวันนี้เพื่อรับสิทธิ์ทุนสนับสนุน
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <Link href="/" className="btn-primary px-6 py-3 text-sm flex items-center gap-2">
+                      สมัครเรียน <ArrowRight className="w-4 h-4" strokeWidth={1.8} />
+                    </Link>
+                    <Link href="/blog" className="btn-ghost px-6 py-3 text-sm">
+                      อ่านบทความ
+                    </Link>
                   </div>
                 </div>
               </div>
             </section>
-
-          </div>
+          </>
         )}
 
         {activeTab !== 'home' && (
           <div className="max-w-7xl mx-auto px-6 py-40 text-center animate-fade-in-up">
-             <div className="bg-white rounded-3xl p-20 shadow-sm border border-[var(--apple-border)] inline-flex flex-col items-center">
-                <Loader2 className="w-8 h-8 text-[var(--text-secondary)] animate-spin mb-6" />
-                <h2 className="text-2xl font-bold tracking-tight mb-2">กำลังโหลด {activeTab}...</h2>
-                <p className="text-[var(--text-secondary)] font-medium mb-8">โปรดรอสักครู่เพื่อตรวจสอบข้อมูล</p>
-                <button onClick={() => setActiveTab('home')} className="bg-[var(--bg-primary)] px-6 py-2 rounded-full font-medium hover:bg-[#e5e5ea] transition">
-                  กลับหน้าแรก
-                </button>
-             </div>
+            <div className="ed-card p-16 md:p-24 inline-flex flex-col items-center">
+              <Loader2 className="w-6 h-6 text-[var(--text-secondary)] animate-spin mb-6" strokeWidth={1.5} />
+              <div className="kicker mb-3">Section</div>
+              <h2 className="display-md text-[var(--text-primary)] mb-3">{activeTab}</h2>
+              <p className="text-[var(--text-secondary)] mb-8">กำลังโหลดข้อมูลส่วนนี้</p>
+              <button onClick={() => setActiveTab('home')} className="btn-ghost px-5 py-2.5 text-sm">
+                ← กลับหน้าแรก
+              </button>
+            </div>
           </div>
         )}
       </main>

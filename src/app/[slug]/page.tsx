@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import Navbar from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import { ArrowLeft, Loader2, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabase } from '@/utils/supabase';
@@ -31,38 +31,55 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
     fetchPage();
   }, [slug]);
 
-  if (loading) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg-primary)]">
-       <Loader2 className="w-8 h-8 text-[var(--text-secondary)] animate-spin" />
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg-primary)]">
+        <Loader2 className="w-6 h-6 text-[var(--text-secondary)] animate-spin mb-4" strokeWidth={1.5} />
+        <div className="kicker">Loading</div>
+      </div>
+    );
+  }
 
   if (!page) return notFound();
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col font-sans">
+    <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col font-sans text-[var(--text-primary)]">
       <Navbar />
 
-      <main className="flex-grow pt-24 pb-32">
-        <article className="max-w-3xl mx-auto px-6 sm:px-8 mt-12 animate-fade-in-up">
-           
-           <div className="mb-10 text-sm font-medium text-[var(--accent)] flex items-center">
-             <Link href="/" className="hover:underline flex items-center"><ChevronRight className="w-4 h-4 mr-1 rotate-180" /> กลับสู่หน้าหลัก</Link>
-           </div>
+      <main className="flex-grow pt-16">
+        <article className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 pt-12 md:pt-20 pb-24">
+          {/* Top bar */}
+          <div className="flex items-center justify-between pb-6 border-b border-[var(--rule)]">
+            <Link href="/" className="inline-flex items-center gap-2 kicker hover:text-[var(--text-primary)] transition-colors">
+              <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2} /> กลับหน้าแรก
+            </Link>
+            <div className="kicker">
+              อัปเดตล่าสุด {new Date(page.updated_at).toLocaleDateString('th-TH')}
+            </div>
+          </div>
 
-           <header className="mb-10 border-b border-[var(--apple-border)] pb-8">
-             <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] tracking-tight leading-tight mb-4">
-               {page.title}
-             </h1>
-             <div className="text-[var(--text-secondary)] text-sm font-medium">
-               อัปเดตล่าสุด: {new Date(page.updated_at).toLocaleDateString()}
-             </div>
-           </header>
+          {/* Title */}
+          <header className="py-14 md:py-24 grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-2">
+              <div className="kicker-accent">Document</div>
+            </div>
+            <div className="lg:col-span-10">
+              <h1 className="display-hero text-[var(--text-primary)]">
+                {page.title}
+              </h1>
+            </div>
+          </header>
 
-           <div className="prose prose-lg max-w-none prose-p:text-[var(--text-primary)] prose-headings:text-[var(--text-primary)] prose-p:leading-relaxed prose-p:font-medium text-[#1d1d1f]">
-             <div dangerouslySetInnerHTML={{ __html: page.content }} />
-           </div>
-
+          {/* Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12">
+            <aside className="lg:col-span-2" aria-hidden />
+            <div className="lg:col-span-10 lg:max-w-[68ch]">
+              <div
+                className="prose prose-lg max-w-none text-[var(--text-primary)] leading-[1.8] prose-headings:font-medium prose-headings:tracking-tight prose-a:accent-text prose-strong:text-[var(--text-primary)] prose-blockquote:border-l-[var(--accent)] prose-blockquote:border-l-4 prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-[var(--text-secondary)]"
+                dangerouslySetInnerHTML={{ __html: page.content }}
+              />
+            </div>
+          </div>
         </article>
       </main>
 
